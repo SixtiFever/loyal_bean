@@ -129,14 +129,6 @@ const FreeCard = (props) => {
                     <View style={{height: '100%', width: '100%', justifyContent: 'center', alignItems: 'center'}}>
                         <Text style={{fontSize: 48, color: 'black'}}>Free</Text>
                     </View>
-                    {/* <View style={styles.currentTally}>
-                        <Text>Current</Text>
-                        <Text style={{fontSize: 28, fontWeight: '600'}}>{props.current}</Text>
-                    </View>
-                    <View style={styles.maxTally}>
-                        <Text>Goal</Text>
-                        <Text style={{fontSize: 28, fontWeight: '600'}}>{props.max}</Text>
-                    </View> */}
                 </View>
             </View>
         </View>

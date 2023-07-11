@@ -8,6 +8,8 @@ const QRScanner = ({navigation}) => {
 
     const [hasPermission, setHasPermission] = useState(null);
     const [scanned, setScanned] = useState(false);
+    const [maxCoffees, setMaxCoffees] = useState(0);
+    let max;
 
     /* on initial render get permissions */
     useEffect(() => {
@@ -24,18 +26,21 @@ const QRScanner = ({navigation}) => {
 
         // create / update the users coffee bought tally for the specified coffee shop
         const collectionRef = collection(FIREBASE_DB, 'data');
+        let shopDocSnap = getShopData(collectionRef, data, setMaxCoffees).then( (snap) => {
+            max = snap.data()['max_tally']
+        }).catch( () => { console.error(error) });
 
         const docRef = doc(collectionRef, FIREBASE_AUTH.currentUser.email);
         let docSnap = getTallyData(data, docRef).then( (docSnap) => {
             if ( docSnap === undefined ) {
-                setDoc(docRef, { [data] : { 'current' : 1, 'max' : 4, 'most_recent' : new Date().getTime() } }, {merge: true} );
+                setDoc(docRef, { [data] : { 'current' : 1, 'max' : max, 'most_recent' : new Date().getTime() } }, {merge: true} );
             } else if ( Number(docSnap.current) >= Number(docSnap.max) ) {
                 // set current to 0, time since epoch
-                setDoc(docRef, { [data] : { 'current' : 0, 'max' : 4, 'most_recent' : new Date().getTime() } }, {merge: true} );
+                setDoc(docRef, { [data] : { 'current' : 0, 'max' : max, 'most_recent' : new Date().getTime() } }, {merge: true} );
             } else if ( Number(docSnap.current) < Number(docSnap.max) ) {
                 // increment current by 1, time since epoch
                 let count = Number(docSnap.current) + 1;
-                setDoc(docRef, { [data] : { 'current' : count, 'max' : 4, 'most_recent' : new Date().getTime() } }, {merge: true} );
+                setDoc(docRef, { [data] : { 'current' : count, 'max' : max, 'most_recent' : new Date().getTime() } }, {merge: true} );
             }
         }).catch(() => { console.error(docSnap) });
         setScanned(true);
@@ -53,6 +58,13 @@ async function getTallyData(shopName, docRef) {
     const docSnap = await getDoc(docRef);
     let data = await docSnap.get(shopName);
     return data;
+}
+
+async function getShopData(collectionRef, shopName) {
+    const shopDocRef = doc(collectionRef, shopName);
+    const docSnap = await getDoc(shopDocRef);
+    const snapData = await docSnap;
+    return await snapData;
 }
 
 const styles = StyleSheet.create({
