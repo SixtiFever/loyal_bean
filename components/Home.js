@@ -32,11 +32,12 @@ const Home = ({navigation}) => {
     useEffect(() => {
         console.log('called');
 
-        // pull tallies from firestore and store in array
+        // retrieve user tallies from firestore and store in array
         let docSnap = getUserDocument().then( snap => {
 
             Object.entries(snap.data()).forEach(([fieldName, fieldValue]) => {
-                arr.push({ name: fieldName, current: fieldValue.current, max: fieldValue.max, timestamp: fieldValue.most_recent, logo: fieldValue.logo });
+                // push retrieved tally data into array of objects. Each object containers tally data for that user / shop combination
+                arr.push({ name: fieldName, current: fieldValue.current, max: fieldValue.max, timestamp: fieldValue.most_recent, logo: fieldValue.logo ? fieldValue.logo : ''});
             });
 
             arr.sort((a,b) => {
@@ -96,10 +97,11 @@ const Home = ({navigation}) => {
 
 
 const Card = (props) => {
+    const logo = props.logo ? props.logo : shopLogo;
     return (
         <View style={styles.cardBackground}>
             <View style={styles.cardLogoBackground}>
-                <Image source={shopLogo} style={{height: 100, width: 100}} />
+                <Image  source={logo} style={{height: 100, width: 100}} />
             </View>
             <View style={styles.cardDetailsBackground}>
                 <View style={styles.titleContainer}>
@@ -121,10 +123,11 @@ const Card = (props) => {
 }
 
 const FreeCard = (props) => {
+    const logo = props.logo ? props.logo : shopLogo;
     return (
         <View style={styles.freeCardBackground}>
             <View style={styles.cardLogoBackground}>
-                <Image source={shopLogo} style={{height: 100, width: 100}} />
+                <Image source={logo} style={{height: 100, width: 100}} />
             </View>
             <View style={styles.cardDetailsBackground}>
                 <View style={styles.titleContainer}>
