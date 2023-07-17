@@ -23,48 +23,46 @@ const QRScanner = ({navigation}) => {
         getBarCodeScannerPermissions();
       }, []);
 
-      /* update the users tally for that specific coffee shop */
-      async function handleBarcodeScanned({ data }) {
+    /* update the users tally for that specific coffee shop */
+async function handleBarcodeScanned({ data }) {
+    setScanned(true);
 
-      // get reference to logo image in firebase storage
-      const storagRef = ref(FIREBASE_STORAGE, `${data}/logo.jpg`);
-      const logoRef = await getDownloadURL(storagRef);
-      console.log(logoRef);
+    // get reference to logo image in firebase storage
+    const storagRef = ref(FIREBASE_STORAGE, `${data}/logo.png`);
+    const logoRef = await getDownloadURL(storagRef);
 
-        // create / update the users coffee bought tally for the specified coffee shop
-        const collectionRef = collection(FIREBASE_DB, 'data');
+      // create / update the users coffee bought tally for the specified coffee shop
+      const collectionRef = collection(FIREBASE_DB, 'data');
 
-        let shopDocSnap = getShopData(collectionRef, data, setMaxCoffees).then( (snap) => {
-            max = snap.data()['max_tally'];
-            logo = snap.data()['logo'];
-            // const vendorRef = ref(FIREBASE_STORAGE, `${data}/${logo}`);
-            // if ( vendorRef ) {
-            //     const logoURL = getDownloadURL(vendorRef).then((snap) => {
-            //         setLogoURI(snap);
-            //         console.log(logoURI);
-            //     }).catch((error) => alert('error pulling logo: ' + error));
-            // }
-        });
+      let shopDocSnap = getShopData(collectionRef, data, setMaxCoffees).then( (snap) => {
+          max = snap.data()['max_tally'];
+      });
 
-        const docRef = doc(collectionRef, FIREBASE_AUTH.currentUser.email);
-        let docSnap = getTallyData(data, docRef).then( (docSnap) => {
-            // on initial scan
-            if ( docSnap === undefined ) {
-                // create a new vendor field for the user document
-                setDoc(docRef, { [data] : { 'current' : 1, 'max' : max, 'most_recent' : new Date().getTime(), 'logo': logoRef } }, {merge: true} );
+      const docRef = doc(collectionRef, FIREBASE_AUTH.currentUser.email);
+      let docSnap = getTallyData(data, docRef).then( (docSnap) => {
+          // on initial scan
+          if ( docSnap === undefined ) {
+            console.log('Clause 1: ' + logoRef);
+              // create a new vendor field for the user document
+              setDoc(docRef, { [data] : { 'current' : 1, 'max' : max, 'most_recent' : new Date().getTime(), 'logo': logoRef } }, {merge: true} );
 
-            } else if ( Number(docSnap.current) >= Number(docSnap.max) ) {
-                // set current to 0, time since epoch
-                setDoc(docRef, { [data] : { 'current' : 0, 'max' : max, 'most_recent' : new Date().getTime() } }, {merge: true} );
-            } else if ( Number(docSnap.current) < Number(docSnap.max) ) {
-                // increment current by 1, time since epoch
-                let count = Number(docSnap.current) + 1;
-                setDoc(docRef, { [data] : { 'current' : count, 'max' : max, 'most_recent' : new Date().getTime() } }, {merge: true} );
-            }
-        }).catch(() => { console.error("error assigning tally data") });
-        setScanned(true);
-        navigation.navigate('Home');
-      }
+          } else if ( Number(docSnap.current) >= Number(docSnap.max) ) {
+              console.log('Clause 2');
+              // set current to 0, time since epoch
+              setDoc(docRef, { [data] : { 'current' : 0, 'max' : max, 'most_recent' : new Date().getTime()} }, {merge: true} );
+          } else if ( Number(docSnap.current) < Number(docSnap.max) ) {
+              console.log('Clause 3');
+              // increment current by 1, time since epoch
+              let count = Number(docSnap.current) + 1;
+              setDoc(docRef, { [data] : { 'current' : count, 'max' : max, 'most_recent' : new Date().getTime() } }, {merge: true} );
+          }
+      }).then(() => {
+          console.log('QrScanner: 2nd then statement')
+          navigation.navigate('Home')
+      }).catch(() => { console.error("error assigning tally data") });
+    }
+
+      
 
     return (
         <View style={styles.container}>
@@ -73,11 +71,13 @@ const QRScanner = ({navigation}) => {
     )
 }
 
+
 async function getTallyData(shopName, docRef) {
     const docSnap = await getDoc(docRef);
     let data = await docSnap.get(shopName);
     return data;
 }
+
 
 async function getShopData(collectionRef, shopName) {
     const shopDocRef = doc(collectionRef, shopName);
@@ -85,6 +85,7 @@ async function getShopData(collectionRef, shopName) {
     const snapData = await docSnap;
     return await snapData;
 }
+
 
 const styles = StyleSheet.create({
     container: {
@@ -96,5 +97,6 @@ const styles = StyleSheet.create({
     },
 
 });
+
 
 export default QRScanner;

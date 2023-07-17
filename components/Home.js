@@ -1,13 +1,12 @@
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { View, Text, StyleSheet, Pressable, Image, ScrollView } from 'react-native';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import QRScanner from './QRScanner';
-import { collection, addDoc, doc, getDoc } from "firebase/firestore";
+import { collection, addDoc, doc, getDoc, FieldValue } from "firebase/firestore";
 import { getFirestore } from "firebase/firestore";
 import db, { FIREBASE_AUTH, FIREBASE_DB } from '../firebase';
-import { useFocusEffect } from "@react-navigation/native";
-import { useCallback } from "react/cjs/react.production.min";
+import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 
 const shopLogo = require('../assets/logos/grow_logo.png')
 
@@ -15,6 +14,7 @@ const Home = ({navigation}) => {
 
     const [username, setUsername] = useState("")
     const [cardArray, setCardArray] = useState([]);
+    const isFocused = useIsFocused();
     let cards = [];
     let arr = [];
 
@@ -28,32 +28,46 @@ const Home = ({navigation}) => {
         // ...
     }
     });
+    
 
     useEffect(() => {
-        console.log('called');
 
-        // retrieve user tallies from firestore and store in array
-        let docSnap = getUserDocument().then( snap => {
+        console.log('Home useEffect called');
 
-            Object.entries(snap.data()).forEach(([fieldName, fieldValue]) => {
-                // push retrieved tally data into array of objects. Each object containers tally data for that user / shop combination
-                arr.push({ name: fieldName, current: fieldValue.current, max: fieldValue.max, timestamp: fieldValue.most_recent, logo: fieldValue.logo ? fieldValue.logo : ''});
-            });
+        /* REWRITE THIS FUNCTION */
 
-            arr.sort((a,b) => {
-                if ( a.timestamp < b.timestamp ) {
-                    return 1;
-                } else if ( a.timestamp > b.timestamp ) {
-                    return -1;
+        (async () => {
+            getUserDocument().then( snap => {
+                console.log('Retrieved user document.');
+                if ( snap.exists() ) {
+                    Object.entries(snap.data()).forEach(([fieldName, fieldValue]) => {
+                        // push retrieved tally data into array of objects. Each object containers tally data for that user / shop combination
+                        arr.push({ name: fieldName, current: fieldValue.current, max: fieldValue.max, timestamp: fieldValue.most_recent, logo: fieldValue.logo ? fieldValue.logo : 'https://fakeimg.pl/600x400'});
+                        console.log('logo url: ' + fieldValue.logo);
+                    });
+            
+                    arr.sort((a,b) => {
+                        if ( a.timestamp < b.timestamp ) {
+                            return 1;
+                        } else if ( a.timestamp > b.timestamp ) {
+                            return -1;
+                        } else {
+                            return 0;
+                        }
+                    });
+                    console.log('sorted');
+    
+                    setCardArray(arr);
+
                 } else {
-                    return 0;
+                    console.log('User document doesn\'t exist');
+                    return;
                 }
-            });
-            setCardArray(arr);
+            }).catch(error => alert(error));
 
-        }).catch(() => alert('error'));
+        })();
 
-    }, []);
+    }, [isFocused]);
 
 
     if (username) {
@@ -69,6 +83,7 @@ const Home = ({navigation}) => {
                                         name={item.name}
                                         current={item.current}
                                         max={item.max}
+                                        logo={item.logo}
                                     />
                                 )
                             } else {
@@ -95,13 +110,12 @@ const Home = ({navigation}) => {
     }
 }
 
-
 const Card = (props) => {
-    const logo = props.logo ? props.logo : shopLogo;
+    let logo = props.logo ? props.logo : shopLogo;
     return (
         <View style={styles.cardBackground}>
             <View style={styles.cardLogoBackground}>
-                <Image  source={logo} style={{height: 100, width: 100}} />
+                <Image  source={{ uri : logo }} style={{height: 100, width: 100}} />
             </View>
             <View style={styles.cardDetailsBackground}>
                 <View style={styles.titleContainer}>
@@ -127,7 +141,7 @@ const FreeCard = (props) => {
     return (
         <View style={styles.freeCardBackground}>
             <View style={styles.cardLogoBackground}>
-                <Image source={logo} style={{height: 100, width: 100}} />
+                <Image source={{ uri: logo }} style={{height: 100, width: 100}} />
             </View>
             <View style={styles.cardDetailsBackground}>
                 <View style={styles.titleContainer}>
