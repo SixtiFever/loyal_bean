@@ -1,5 +1,5 @@
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Image, ScrollView } from 'react-native';
 import { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import QRScanner from './QRScanner';
@@ -7,6 +7,7 @@ import { collection, addDoc, doc, getDoc } from "firebase/firestore";
 import { getFirestore } from "firebase/firestore";
 import db, { FIREBASE_AUTH, FIREBASE_DB } from '../firebase';
 import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react/cjs/react.production.min";
 
 const shopLogo = require('../assets/logos/grow_logo.png')
 
@@ -28,13 +29,14 @@ const Home = ({navigation}) => {
     }
     });
 
-    useFocusEffect(() => {
+    useEffect(() => {
+        console.log('called');
 
         // pull tallies from firestore and store in array
         let docSnap = getUserDocument().then( snap => {
 
             Object.entries(snap.data()).forEach(([fieldName, fieldValue]) => {
-                arr.push({ name: fieldName, current: fieldValue.current, max: fieldValue.max, timestamp: fieldValue.most_recent });
+                arr.push({ name: fieldName, current: fieldValue.current, max: fieldValue.max, timestamp: fieldValue.most_recent, logo: fieldValue.logo });
             });
 
             arr.sort((a,b) => {
@@ -49,35 +51,38 @@ const Home = ({navigation}) => {
             setCardArray(arr);
 
         }).catch(() => alert('error'));
-        
-    })
+
+    }, []);
 
 
     if (username) {
         return (
             <View style={styles.mainBackground}>
                 <View style={styles.cardListContainer}>
-                    {cardArray.map(item => {
-                        if ( item.current >= item.max ) {
-                            return (
-                                <FreeCard
-                                    key={item.name}
-                                    name={item.name}
-                                    current={item.current}
-                                    max={item.max}
-                                />
-                            )
-                        } else {
-                            return (
-                                <Card
-                                    key={item.name}
-                                    name={item.name}
-                                    current={item.current}
-                                    max={item.max}
-                                />
-                            )
-                        }
-                    })}
+                    <ScrollView contentContainerStyle={{alignItems:'center'}} style={{flex: 1}}>
+                        {cardArray.map(item => {
+                            if ( item.current >= item.max ) {
+                                return (
+                                    <FreeCard
+                                        key={item.name}
+                                        name={item.name}
+                                        current={item.current}
+                                        max={item.max}
+                                    />
+                                )
+                            } else {
+                                return (
+                                    <Card
+                                        key={item.name}
+                                        name={item.name}
+                                        current={item.current}
+                                        max={item.max}
+                                        logo={item.logo}
+                                    />
+                                )
+                            }
+                        })}
+                    </ScrollView>
                 </View>
                 <View style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                     <Pressable style={styles.scanButton} onPress={()=> navigation.navigate('QRScanner')}>
@@ -146,7 +151,7 @@ async function getUserDocument() {
 
 const styles = StyleSheet.create({
     mainBackground: {
-        backgroundColor: 'white',
+        backgroundColor: '#FAF7F5',
         height: '100%',
         width: '100%',
     },
@@ -156,6 +161,7 @@ const styles = StyleSheet.create({
         paddingTop: 25,
         display: 'flex',
         alignItems: 'center',
+        backgroundColor: '#FAF7F5',
     },
     cardBackground: {
         backgroundColor: 'white',
