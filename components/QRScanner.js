@@ -28,38 +28,45 @@ const QRScanner = ({navigation}) => {
 async function handleBarcodeScanned({ data }) {
     setScanned(true);
 
-    // get reference to logo image in firebase storage
-    const storagRef = ref(FIREBASE_STORAGE, `${data}/logo.png`);
-    const logoRef = await getDownloadURL(storagRef);
-
       // create / update the users coffee bought tally for the specified coffee shop
       const collectionRef = collection(FIREBASE_DB, 'data');
 
-      let shopDocSnap = getShopData(collectionRef, data, setMaxCoffees).then( (snap) => {
+      await getShopData(collectionRef, data).then( (snap) => {
           max = snap.data()['max_tally'];
+          logo = snap.data()['logo'];
       });
 
       const docRef = doc(collectionRef, FIREBASE_AUTH.currentUser.email);
       let docSnap = getTallyData(data, docRef).then( (docSnap) => {
           // on initial scan
           if ( docSnap === undefined ) {
-            console.log('Clause 1: ' + logoRef);
+            console.log('Clause 1');
               // create a new vendor field for the user document
-              setDoc(docRef, { [data] : { 'current' : 1, 'max' : max, 'most_recent' : new Date().getTime(), 'logo': logoRef } }, {merge: true} );
-
+              setDoc(docRef, { [data] : { 'current' : 1, 'max' : max, 'most_recent' : new Date().getTime(), 'logo': logo } }, {merge: true} );
+              return 1;
           } else if ( Number(docSnap.current) >= Number(docSnap.max) ) {
               console.log('Clause 2');
               // set current to 0, time since epoch
-              setDoc(docRef, { [data] : { 'current' : 0, 'max' : max, 'most_recent' : new Date().getTime()} }, {merge: true} );
+              setDoc(docRef, { [data] : { 'current' : 0, 'max' : max, 'most_recent' : new Date().getTime(),'logo': logo } }, {merge: true} );
+              return 0;
           } else if ( Number(docSnap.current) < Number(docSnap.max) ) {
               console.log('Clause 3');
               // increment current by 1, time since epoch
               let count = Number(docSnap.current) + 1;
-              setDoc(docRef, { [data] : { 'current' : count, 'max' : max, 'most_recent' : new Date().getTime() } }, {merge: true} );
+              setDoc(docRef, { [data] : { 'current' : count, 'max' : max, 'most_recent' : new Date().getTime(),'logo': logo } }, {merge: true} );
+              return count;
           }
-      }).then(() => {
-          console.log('{QRScanner} returning to Home');
-          return navigation.navigate('Home')
+      }).then((val) => {
+
+        getTallyData(data, docRef).then( (docSnap) => {
+            while ( docSnap['current'] != val ) {
+                console.log(docSnap.current + ' != ' + val);
+                continue;
+            }
+        }).then(() => {
+            console.log('{QRScanner} returning to Home');
+            return navigation.navigate('Home');
+        })
       }).catch(() => { console.error("error assigning tally data") });
     }
 
