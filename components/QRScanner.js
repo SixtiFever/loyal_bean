@@ -38,6 +38,7 @@ async function handleBarcodeScanned({ data }) {
 
       const docRef = doc(collectionRef, FIREBASE_AUTH.currentUser.email);
       let docSnap = getTallyData(data, docRef).then( (docSnap) => {
+        console.log('{QRScanner}: Scanned - ' + data);
           // on initial scan
           if ( docSnap === undefined ) {
             console.log('Clause 1');

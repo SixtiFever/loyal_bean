@@ -47,6 +47,15 @@ const Home = ({navigation}) => {
                 });
                 return coffeeShopObjects;
             }).then( coffeeShopObjects => {
+                coffeeShopObjects.sort((a,b) => {
+                    if ( a.timestamp < b.timestamp ) {
+                        return 1;
+                    } else if ( a.timestamp > b.timestamp ) {
+                        return -1;
+                    } else {
+                        return 0;
+                    }
+                });
                 setCardArray(coffeeShopObjects);
             }).catch( (error) => { console.log('{Home}: Error retrieving user coffeeShop document: ' + error) });
         })();
