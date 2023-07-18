@@ -15,6 +15,7 @@ const QRScanner = ({navigation}) => {
 
     /* on initial render get permissions */
     useEffect(() => {
+        console.log('{QRScanner}: useEffect called');
         const getBarCodeScannerPermissions = async () => {
           const { status } = await BarCodeScanner.requestPermissionsAsync();
           setHasPermission(status === 'granted');
@@ -57,8 +58,8 @@ async function handleBarcodeScanned({ data }) {
               setDoc(docRef, { [data] : { 'current' : count, 'max' : max, 'most_recent' : new Date().getTime() } }, {merge: true} );
           }
       }).then(() => {
-          console.log('QrScanner: 2nd then statement')
-          navigation.navigate('Home')
+          console.log('{QRScanner} returning to Home');
+          return navigation.navigate('Home')
       }).catch(() => { console.error("error assigning tally data") });
     }
 

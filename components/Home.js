@@ -31,83 +31,95 @@ const Home = ({navigation}) => {
     
 
     useEffect(() => {
+        if ( !isFocused ) return;
 
-        console.log('Home useEffect called');
+        console.log('{Home}: useEffect called: ' + isFocused);
 
         /* REWRITE THIS FUNCTION */
 
-        (async () => {
-            getUserDocument().then( snap => {
-                console.log('Retrieved user document.');
-                if ( snap.exists() ) {
-                    Object.entries(snap.data()).forEach(([fieldName, fieldValue]) => {
-                        // push retrieved tally data into array of objects. Each object containers tally data for that user / shop combination
-                        arr.push({ name: fieldName, current: fieldValue.current, max: fieldValue.max, timestamp: fieldValue.most_recent, logo: fieldValue.logo ? fieldValue.logo : 'https://fakeimg.pl/600x400'});
-                        console.log('logo url: ' + fieldValue.logo);
-                    });
+        // (async () => {
+        //     getUserDocument().then( snap => {
+        //         console.log('Retrieved user document.');
+        //         if ( snap.exists() ) {
+        //             Object.entries(snap.data()).forEach(([fieldName, fieldValue]) => {
+        //                 // push retrieved tally data into array of objects. Each object containers tally data for that user / shop combination
+        //                 arr.push({ name: fieldName, current: fieldValue.current, max: fieldValue.max, timestamp: fieldValue.most_recent, logo: fieldValue.logo ? fieldValue.logo : 'https://fakeimg.pl/600x400'});
+        //                 console.log('logo url: ' + fieldValue.logo);
+        //             });
             
-                    arr.sort((a,b) => {
-                        if ( a.timestamp < b.timestamp ) {
-                            return 1;
-                        } else if ( a.timestamp > b.timestamp ) {
-                            return -1;
-                        } else {
-                            return 0;
-                        }
-                    });
-                    console.log('sorted');
+        //             arr.sort((a,b) => {
+        //                 if ( a.timestamp < b.timestamp ) {
+        //                     return 1;
+        //                 } else if ( a.timestamp > b.timestamp ) {
+        //                     return -1;
+        //                 } else {
+        //                     return 0;
+        //                 }
+        //             });
+        //             console.log('sorted');
     
-                    setCardArray(arr);
+        //             setCardArray(arr);
 
-                } else {
-                    console.log('User document doesn\'t exist');
-                    return;
-                }
-            }).catch(error => alert(error));
+        //         } else {
+        //             console.log('User document doesn\'t exist');
+        //             return;
+        //         }
+        //     }).catch(error => alert(error));
 
-        })();
+        // })();
 
     }, [isFocused]);
 
-
-    if (username) {
-        return (
-            <View style={styles.mainBackground}>
-                <View style={styles.cardListContainer}>
-                    <ScrollView contentContainerStyle={{alignItems:'center'}} style={{flex: 1}}>
-                        {cardArray.map(item => {
-                            if ( item.current >= item.max ) {
-                                return (
-                                    <FreeCard
-                                        key={item.name}
-                                        name={item.name}
-                                        current={item.current}
-                                        max={item.max}
-                                        logo={item.logo}
-                                    />
-                                )
-                            } else {
-                                return (
-                                    <Card
-                                        key={item.name}
-                                        name={item.name}
-                                        current={item.current}
-                                        max={item.max}
-                                        logo={item.logo}
-                                    />
-                                )
-                            }
-                        })}
-                    </ScrollView>
-                </View>
-                <View style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                    <Pressable style={styles.scanButton} onPress={()=> navigation.navigate('QRScanner')}>
-                        <Ionicons name="scan" size={42} color="black" />
-                    </Pressable>
-                </View>
+    return (
+        <View>
+            <Text>Home page</Text>
+            <View style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                <Pressable style={styles.scanButton} onPress={() => { navigation.navigate('QRScanner') }}>
+                    <Ionicons name="scan" size={42} color="black" />
+                </Pressable>
             </View>
-        )
-    }
+        </View>
+    )
+
+
+    // if (username) {
+    //     return (
+    //         <View style={styles.mainBackground}>
+    //             <View style={styles.cardListContainer}>
+    //                 <ScrollView contentContainerStyle={{alignItems:'center'}} style={{flex: 1}}>
+    //                     {cardArray.map(item => {
+    //                         if ( item.current >= item.max ) {
+    //                             return (
+    //                                 <FreeCard
+    //                                     key={item.name}
+    //                                     name={item.name}
+    //                                     current={item.current}
+    //                                     max={item.max}
+    //                                     logo={item.logo}
+    //                                 />
+    //                             )
+    //                         } else {
+    //                             return (
+    //                                 <Card
+    //                                     key={item.name}
+    //                                     name={item.name}
+    //                                     current={item.current}
+    //                                     max={item.max}
+    //                                     logo={item.logo}
+    //                                 />
+    //                             )
+    //                         }
+    //                     })}
+    //                 </ScrollView>
+    //             </View>
+    //             <View style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+    //                 <Pressable style={styles.scanButton} onPress={()=> navigation.navigate('QRScanner')}>
+    //                     <Ionicons name="scan" size={42} color="black" />
+    //                 </Pressable>
+    //             </View>
+    //         </View>
+    //     )
+    // }
 }
 
 const Card = (props) => {
