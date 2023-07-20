@@ -59,16 +59,47 @@ async function handleBarcodeScanned({ data }) {
           }
       }).then((val) => {
 
+        /* checks that firestore holds the updated current value */
+        function intervalFunction() {
+            getTallyData( data, docRef ).then( (docSnap) => {
+                if ( docSnap['current'] == val ) return true;
+            })
+        }
+
+        /* repeats interval until firestore holds the updated current value  */
+        let checkCorrectCurrent = setInterval( intervalFunction, 100, data, docRef, val );
+        while( !checkCorrectCurrent ) {
+            console.log('Incorrect current');
+            continue;
+        }
+        console.log( 'docSnap[\'current\'] == val ' )
+        clearInterval( checkCorrectCurrent );
         getTallyData(data, docRef).then( (docSnap) => {
-            while ( docSnap['current'] != val ) {
-                console.log(docSnap.current + ' != ' + val);
-                continue;
-            }
+
         }).then(() => {
             console.log('{QRScanner} returning to Home');
             return navigation.navigate('Home');
         })
-      }).catch(() => { console.error("error assigning tally data") });
+        // getTallyData(data, docRef).then( (docSnap) => {
+        //     do {
+        //         let checkRetrievedCurrent = setInterval( () => {
+        //             return docSnap['current'] == val
+        //         }, 1000 );
+        //         if ( checkRetrievedCurrent ) {
+        //             clearInterval(checkRetrievedCurrent)
+        //         }
+        //         console.log(docSnap.current + ' != ' + val);
+        //     } while( docSnap['current'] != val )
+
+        //     while ( docSnap['current'] != val ) {
+        //         console.log(docSnap.current + ' != ' + val);
+        //         continue;
+        //     }
+        // }).then(() => {
+        //     console.log('{QRScanner} returning to Home');
+        //     return navigation.navigate('Home');
+        // })
+      }).catch((error) => { console.error("error assigning tally data: " + error) });
     }
 
       
