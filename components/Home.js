@@ -41,7 +41,6 @@ const Home = ({navigation}) => {
             await getUserDocument().then( userDocSnap => {
                 console.log('{Home - async}: Retrieved user document snapshot: ' + userDocSnap.id);
                 let coffeeShopObjects = [];
-                console.log('String docSnap: ' + JSON.stringify(userDocSnap.data()))
                 // iterates coffee shops in the users document
                 Object.entries( userDocSnap.data() ).forEach( ([coffeeShop, coffeeShopData]) => {
                     coffeeShopObjects.push({ 'name' : coffeeShop, 'current' : coffeeShopData.current, 'max' : coffeeShopData.max, 'timestamp' : coffeeShopData.most_recent, 'logo' : coffeeShopData.logo });
@@ -65,7 +64,6 @@ const Home = ({navigation}) => {
     }, [isFocused]);
 
     if (username) {
-        console.log("{Home}: Return")
         return (
             <View style={styles.mainBackground}>
                 <View style={styles.cardListContainer}>

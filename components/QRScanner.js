@@ -11,82 +11,84 @@ const QRScanner = ({navigation}) => {
     const [scanned, setScanned] = useState(false);
     const [maxCoffees, setMaxCoffees] = useState(0);
     const [logoURI, setLogoURI] = useState("");
-    const [docSnapSize, setDocSnapSize] = useState(0);
-    let max, logo;
+    const [userDoc, setUserDoc] = useState(null);
+    const [userDocSize, setUserDocSize] = useState(0);
+    let max, logo, userDocObj;
 
-    /* on initial render get permissions */
+    /* on initial render get permissions and put all user data */
     useEffect(() => {
         console.log('{QRScanner}: useEffect called');
+
+        // get permissions
         const getBarCodeScannerPermissions = async () => {
           const { status } = await BarCodeScanner.requestPermissionsAsync();
           setHasPermission(status === 'granted');
         };
-    
+
         getBarCodeScannerPermissions();
+
+        // get user document
+        const collectionRef = collection(FIREBASE_DB, 'data');
+        const userDocRef = doc( collectionRef, FIREBASE_AUTH.currentUser.email );
+        getDoc(userDocRef).then( (userDoc) => {
+            if ( userDoc ) {
+                return setUserDoc(userDoc);
+            } else {
+                return setUserDoc(undefined);
+            }
+        }).catch((error) => {
+            console.log(error + 'Error......');
+        });
       }, []);
 
-    /* update the users tally for that specific coffee shop */
-async function handleBarcodeScanned({ data }) {
-    setScanned(true);
+    async function handleBarcodeScanned( {data} ) {
+        setScanned(true);
 
-      // create / update the users coffee bought tally for the specified coffee shop
-      const collectionRef = collection(FIREBASE_DB, 'data');
+        // temp object to make local copy of user document snapshot
+        let tempDoc = {  }
 
-      await getShopData(collectionRef, data).then( (snap) => {
-          max = snap.data()['max_tally'];
-          logo = snap.data()['logo'];
-      });
-
-      const docRef = doc(collectionRef, FIREBASE_AUTH.currentUser.email);
-      await getDoc( docRef ).then( (userDocRef) => {
-        setDocSnapSize(Object.keys(userDocRef.data()).length);
-      } )
-      let docSnap = getTallyData(data, docRef).then( (docSnap) => {
-        console.log('{QRScanner}: Scanned - ' + data);
-          // on initial scan
-          if ( docSnap === undefined ) {
-              // create a new vendor field for the user document
-              setDoc(docRef, { [data] : { 'current' : 1, 'max' : max, 'most_recent' : new Date().getTime(), 'logo': logo } }, {merge: true} );
-              setDocSnapSize(docSnapSize + 1);
-              return 1;
-          } else if ( Number(docSnap.current) >= Number(docSnap.max) ) {
-              // set current to 0, time since epoch
-              setDoc(docRef, { [data] : { 'current' : 0, 'max' : max, 'most_recent' : new Date().getTime(),'logo': logo } }, {merge: true} );
-              return 0;
-          } else if ( Number(docSnap.current) < Number(docSnap.max) ) {
-              // increment current by 1, time since epoch
-              let count = Number(docSnap.current) + 1;
-              setDoc(docRef, { [data] : { 'current' : count, 'max' : max, 'most_recent' : new Date().getTime(),'logo': logo } }, {merge: true} );
-              return count;
-          }
-      }).then((val) => {
-
-        /* checks that firestore holds the updated current value */
-        function intervalFunction() {
-            getTallyData( data, docRef ).then( (docSnap) => {
-                if ( docSnap['current'] == val && size == docSnapSize ) {
-                    console.log('{QRScanner} intervalFunction: ' + Object.keys(docRef.data()).length + ' : ' + docSnapSize);
-                    return true;
-                }
-            })
+        // copy field values from doc snap into a temp object
+        for ( let prop in userDoc.data()[data] ) {
+            tempDoc[prop] = userDoc.data()[data][prop];
         }
 
-        /* repeats interval until firestore holds the updated current value  */
-        let checkCorrectCurrent = setInterval( intervalFunction, 100, data, docRef, val );
-        while( !checkCorrectCurrent ) {
-            console.log('Incorrect current');
-            continue;
+        // conditions for updating loyalty card data
+        if ( Number(tempDoc['current']) >= Number(tempDoc['max']) ) {
+            tempDoc['current'] = 0;
+            tempDoc['most_recent'] = new Date().getTime();
+        } else if ( Number(tempDoc['current']) < Number(tempDoc['max']) ) {
+            tempDoc['current'] += 1;
+            tempDoc['most_recent'] = new Date().getTime();
+        } else if ( tempDoc['current'] === undefined ) {
+            // get shop document
+            const collectionRef = collection( FIREBASE_DB, 'data' );
+            // get shop data needed to create loyalty card for user ( name, logo, current, max )
+            await getShopData(collectionRef, data).then( (shopSnap) => {
+                tempDoc['max'] = shopSnap.data()['max_tally'];
+                tempDoc['logo'] = shopSnap.data()['logo'];
+                tempDoc['current'] = 1;
+                tempDoc['most_recent'] = new Date().getTime();
+            }).catch((error) => console.log(error));
         }
 
-        clearInterval( checkCorrectCurrent );
-        getTallyData(data, docRef).then( (docSnap) => {
-        }).then(() => {
-            console.log('{QRScanner} returning to Home.');
-            return navigation.navigate('Home' );
-        }).catch((error) => {console.log(error)})
-      }).catch((error) => { console.error("error assigning tally data: " + error) });
+        let newObj = { [data] : tempDoc }
+
+        console.log('Old object: ' + JSON.stringify(userDoc.data()));
+        console.log('New object: ' + JSON.stringify(newObj));
+
+        // // set document
+        const collectionRef = collection(FIREBASE_DB, 'data');
+        const userDocRef = doc(collectionRef, FIREBASE_AUTH.currentUser.email);
+        await setDoc( userDocRef , newObj , {merge: true} ).then(() => {
+            console.log('Set doc success');
+            return navigation.navigate('Home');
+        }).catch((error) => {
+            console.log('Set doc error ' + error.message);
+        })
+
+        // // if user has loyalty card
+        // console.log(JSON.stringify(userDocObj.data()));
     }
-
       
 
     return (
