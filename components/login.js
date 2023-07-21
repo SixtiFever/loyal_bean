@@ -34,7 +34,7 @@ const Login = ({navigation}) => {
             <View style={styles.inputContainer}>
                 <View style={{flex: 1, alignItems: 'center', justifyContent: 'space-evenly'}}>
                     <TextInput style={styles.textInput} placeholder="Email" onChangeText={text => setUsername(text)}/>
-                    <TextInput style={[styles.textInput]} placeholder="Password" onChangeText={text => setPassword(text)} />
+                    <TextInput secureTextEntry={true} style={[styles.textInput]} placeholder="Password" onChangeText={text => setPassword(text)} />
                     <Pressable style={styles.pressableButton} onPress={handleLogin}>
                         <Text style={{color: 'white'}}>Login</Text>
                     </Pressable>

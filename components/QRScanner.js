@@ -11,6 +11,7 @@ const QRScanner = ({navigation}) => {
     const [scanned, setScanned] = useState(false);
     const [maxCoffees, setMaxCoffees] = useState(0);
     const [logoURI, setLogoURI] = useState("");
+    const [docSnapSize, setDocSnapSize] = useState(0);
     let max, logo;
 
     /* on initial render get permissions */
@@ -37,21 +38,22 @@ async function handleBarcodeScanned({ data }) {
       });
 
       const docRef = doc(collectionRef, FIREBASE_AUTH.currentUser.email);
+      await getDoc( docRef ).then( (userDocRef) => {
+        setDocSnapSize(Object.keys(userDocRef.data()).length);
+      } )
       let docSnap = getTallyData(data, docRef).then( (docSnap) => {
         console.log('{QRScanner}: Scanned - ' + data);
           // on initial scan
           if ( docSnap === undefined ) {
-            console.log('Clause 1');
               // create a new vendor field for the user document
               setDoc(docRef, { [data] : { 'current' : 1, 'max' : max, 'most_recent' : new Date().getTime(), 'logo': logo } }, {merge: true} );
+              setDocSnapSize(docSnapSize + 1);
               return 1;
           } else if ( Number(docSnap.current) >= Number(docSnap.max) ) {
-              console.log('Clause 2');
               // set current to 0, time since epoch
               setDoc(docRef, { [data] : { 'current' : 0, 'max' : max, 'most_recent' : new Date().getTime(),'logo': logo } }, {merge: true} );
               return 0;
           } else if ( Number(docSnap.current) < Number(docSnap.max) ) {
-              console.log('Clause 3');
               // increment current by 1, time since epoch
               let count = Number(docSnap.current) + 1;
               setDoc(docRef, { [data] : { 'current' : count, 'max' : max, 'most_recent' : new Date().getTime(),'logo': logo } }, {merge: true} );
@@ -62,7 +64,10 @@ async function handleBarcodeScanned({ data }) {
         /* checks that firestore holds the updated current value */
         function intervalFunction() {
             getTallyData( data, docRef ).then( (docSnap) => {
-                if ( docSnap['current'] == val ) return true;
+                if ( docSnap['current'] == val && size == docSnapSize ) {
+                    console.log('{QRScanner} intervalFunction: ' + Object.keys(docRef.data()).length + ' : ' + docSnapSize);
+                    return true;
+                }
             })
         }
 
@@ -72,33 +77,13 @@ async function handleBarcodeScanned({ data }) {
             console.log('Incorrect current');
             continue;
         }
-        console.log( 'docSnap[\'current\'] == val ' )
+
         clearInterval( checkCorrectCurrent );
         getTallyData(data, docRef).then( (docSnap) => {
-
         }).then(() => {
-            console.log('{QRScanner} returning to Home');
-            return navigation.navigate('Home');
-        })
-        // getTallyData(data, docRef).then( (docSnap) => {
-        //     do {
-        //         let checkRetrievedCurrent = setInterval( () => {
-        //             return docSnap['current'] == val
-        //         }, 1000 );
-        //         if ( checkRetrievedCurrent ) {
-        //             clearInterval(checkRetrievedCurrent)
-        //         }
-        //         console.log(docSnap.current + ' != ' + val);
-        //     } while( docSnap['current'] != val )
-
-        //     while ( docSnap['current'] != val ) {
-        //         console.log(docSnap.current + ' != ' + val);
-        //         continue;
-        //     }
-        // }).then(() => {
-        //     console.log('{QRScanner} returning to Home');
-        //     return navigation.navigate('Home');
-        // })
+            console.log('{QRScanner} returning to Home.');
+            return navigation.navigate('Home' );
+        }).catch((error) => {console.log(error)})
       }).catch((error) => { console.error("error assigning tally data: " + error) });
     }
 
@@ -122,8 +107,8 @@ async function getTallyData(shopName, docRef) {
 async function getShopData(collectionRef, shopName) {
     const shopDocRef = doc(collectionRef, shopName);
     const docSnap = await getDoc(shopDocRef);
-    const snapData = await docSnap;
-    return await snapData;
+    const snapData = docSnap;
+    return snapData;
 }
 
 

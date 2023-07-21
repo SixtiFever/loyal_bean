@@ -41,9 +41,11 @@ const Home = ({navigation}) => {
             await getUserDocument().then( userDocSnap => {
                 console.log('{Home - async}: Retrieved user document snapshot: ' + userDocSnap.id);
                 let coffeeShopObjects = [];
+                console.log('String docSnap: ' + JSON.stringify(userDocSnap.data()))
                 // iterates coffee shops in the users document
                 Object.entries( userDocSnap.data() ).forEach( ([coffeeShop, coffeeShopData]) => {
                     coffeeShopObjects.push({ 'name' : coffeeShop, 'current' : coffeeShopData.current, 'max' : coffeeShopData.max, 'timestamp' : coffeeShopData.most_recent, 'logo' : coffeeShopData.logo });
+                    console.log('{Home} Pushing ' + coffeeShop + ' to CoffeeShop array.')
                 });
                 return coffeeShopObjects;
             }).then( coffeeShopObjects => {
@@ -142,7 +144,7 @@ const FreeCard = (props) => {
                 </View>
                 <View style={styles.tallyContainer}>
                     <View style={{height: '100%', width: '100%', justifyContent: 'center', alignItems: 'center'}}>
-                        <Text style={{fontSize: 48, color: 'black'}}>Free</Text>
+                        <Text style={{fontSize: 30, color: 'black'}}>Redeem Coffee</Text>
                     </View>
                 </View>
             </View>
