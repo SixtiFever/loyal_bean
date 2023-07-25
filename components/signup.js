@@ -1,7 +1,7 @@
 import { StyleSheet, View, TextInput, Pressable, Text, Image } from "react-native";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink } from "firebase/auth";
 import { useState } from 'react';
-import { FIREBASE_AUTH, FIREBASE_DB } from "../firebase";
+import { FIREBASE_APP, FIREBASE_AUTH, FIREBASE_DB } from "../firebase";
 import { collection, setDoc, doc } from "firebase/firestore";
 
 const logo = require('/Users/JDSwift/Desktop/react-native/login-portal/assets/lb_logo.png');
@@ -13,10 +13,24 @@ const Signup = ({navigation}) => {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("")
 
-    function handleSignup() {
-        if ((!username || !password || !confirmPassword) || (password != confirmPassword)) {
-            alert('Signup error. Check fields.');
+    async function handleSignup() {
+        // const actionCodeSettings = {
+        //             url: 'https://www.google.com',
+        //             handleCodeInApp: true,
+        //         }
+
+        // await sendSignInLinkToEmail(FIREBASE_AUTH, username, actionCodeSettings);
+        // if(isSignInWithEmailLink(FIREBASE_AUTH, emailLink)) {
+        //     await signInWithEmailLink(FIREBASE_AUTH, username, emailLink);
+        // }
+
+        if (!hasEmailFormat(username) || (!username || !password || !confirmPassword) || (password != confirmPassword)) {
+            alert('Signup error. Ensure a university email is used, and all fields are correctly filled.');
         } else {
+            const actionCodeSettings = {
+                url: 'https://www.google.com',
+                handleCodeInApp: true,
+            }
             createUserWithEmailAndPassword(FIREBASE_AUTH, username, password).then((userCredential) => {
                 const user = userCredential.user;
 
@@ -30,7 +44,6 @@ const Signup = ({navigation}) => {
                 alert(error.message);
             });
         }
-
     }
 
     return (
@@ -53,6 +66,15 @@ const Signup = ({navigation}) => {
             </View>
         </View>
     )
+}
+
+
+const hasEmailFormat = (email) => {
+    let uniEmailFormat = ".ac.uk"
+    if ( email.includes(uniEmailFormat) ) {
+        console.log('Correct uni formatted email');
+        return true;
+    }
 }
 
 const styles = StyleSheet.create({
