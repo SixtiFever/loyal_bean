@@ -1,5 +1,5 @@
-import { StyleSheet, View, TextInput, Pressable, Text, Image } from "react-native";
-import { getAuth, createUserWithEmailAndPassword, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink } from "firebase/auth";
+import { StyleSheet, View, TextInput, Pressable, Text, Image, KeyboardAvoidingView } from "react-native";
+import { getAuth, createUserWithEmailAndPassword, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, sendEmailVerification } from "firebase/auth";
 import { useState } from 'react';
 import { FIREBASE_APP, FIREBASE_AUTH, FIREBASE_DB } from "../firebase";
 import { collection, setDoc, doc } from "firebase/firestore";
@@ -14,56 +14,60 @@ const Signup = ({navigation}) => {
     const [confirmPassword, setConfirmPassword] = useState("")
 
     async function handleSignup() {
-        // const actionCodeSettings = {
-        //             url: 'https://www.google.com',
-        //             handleCodeInApp: true,
-        //         }
 
-        // await sendSignInLinkToEmail(FIREBASE_AUTH, username, actionCodeSettings);
-        // if(isSignInWithEmailLink(FIREBASE_AUTH, emailLink)) {
-        //     await signInWithEmailLink(FIREBASE_AUTH, username, emailLink);
-        // }
-
-        if (!hasEmailFormat(username) || (!username || !password || !confirmPassword) || (password != confirmPassword)) {
+        if ((!username || !password || !confirmPassword) || (password != confirmPassword)) {
             alert('Signup error. Ensure a university email is used, and all fields are correctly filled.');
         } else {
-            const actionCodeSettings = {
-                url: 'https://www.google.com',
-                handleCodeInApp: true,
+
+            try {
+                let userCredential = await createUserWithEmailAndPassword(FIREBASE_AUTH, username, password);
+                await sendEmailVerification(userCredential.user);
+                alert('Email verified. You may now sign in.');
+
+            } catch (error) {
+                console.log(error);
             }
-            createUserWithEmailAndPassword(FIREBASE_AUTH, username, password).then((userCredential) => {
-                const user = userCredential.user;
 
-                // add to firestore database
-                const collectionRef = collection( FIREBASE_DB, 'data' );
-                const docRef = doc(collectionRef, user.email);
-                setDoc(docRef, {});
-
-                navigation.navigate('Login');
-            }).catch((error) => {
-                alert(error.message);
-            });
+            // createUserWithEmailAndPassword(FIREBASE_AUTH, username, password).then((userCredential) => {
+            //     const user = userCredential.user;
+            //     return userCredential
+            // }).then( (userCredential) => {
+            //     sendEmailVerification(userCredential.user).then(() => {
+            //         console.log('In email verification function');
+            //     }).catch((error) => {
+            //         console.log(error);
+            //     }) 
+            //     console.log('After sendEmailVerfification');
+            // }).catch((error) => {
+            //     alert(error.message);
+            // });
         }
+    }
+
+    async function handleVerifyEmail(verificationCode) {
+        
     }
 
     return (
         <View style={styles.mainContainer}>
-            <View style={styles.logoContainer}>
-                <Image source={logo} style={{height: 100, width: 100}} />
-            </View>
-            <View style={styles.inputContainer}>
-                <View style={{flex: 1, alignItems: 'center', justifyContent: 'space-evenly'}}>
-                    <TextInput style={styles.textInput} placeholder="Email" onChangeText={text => setUsername(text)} />
-                    <TextInput style={[styles.textInput]} placeholder="Password" onChangeText={password => setPassword(password)} />
-                    <TextInput style={[styles.textInput]} placeholder="Confirm password" onChangeText={password => setConfirmPassword(password)} />
-                    <Pressable style={styles.pressableButton} onPress={handleSignup}>
-                        <Text style={{color: 'white'}}>Create Account</Text>
-                    </Pressable>
-                    <Pressable onPress={() => navigation.navigate('Login')}>
-                        <Text style={styles.pressableText}>Login</Text>
-                    </Pressable>
+            <KeyboardAvoidingView style={{flex: 1}} behavior="padding">
+                <View style={styles.logoContainer}>
+                    <Image source={logo} style={{height: 100, width: 100}} />
                 </View>
-            </View>
+                <View style={styles.inputContainer}>
+                    <View style={{flex: 1, alignItems: 'center', justifyContent: 'space-evenly'}}>
+                        <TextInput style={styles.textInput} placeholder="Email" onChangeText={text => setUsername(text)} />
+                        <TextInput style={[styles.textInput]} placeholder="Password" onChangeText={password => setPassword(password)} />
+                        <TextInput style={[styles.textInput]} placeholder="Confirm password" onChangeText={password => setConfirmPassword(password)} />
+                        <Pressable style={styles.pressableButton} onPress={handleSignup}>
+                            <Text style={{color: 'white'}}>Create Account</Text>
+                        </Pressable>
+                        <Pressable onPress={() => navigation.navigate('Login')}>
+                            <Text style={styles.pressableText}>Login</Text>
+                        </Pressable>
+                    </View>
+                </View>
+            </KeyboardAvoidingView>
         </View>
     )
 }

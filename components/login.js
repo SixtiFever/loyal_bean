@@ -1,4 +1,4 @@
-import { StyleSheet, View, TextInput, Pressable, Text, Image } from "react-native";
+import { StyleSheet, View, TextInput, Pressable, Text, Image, KeyboardAvoidingView } from "react-native";
 import { useState } from 'react';
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { FIREBASE_AUTH } from "../firebase";
@@ -11,38 +11,52 @@ const Login = ({navigation}) => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
-    function handleLogin() {
+    async function handleLogin() {
 
-        signInWithEmailAndPassword(FIREBASE_AUTH, username, password).then((userCredential) => {
+        try {
+            await signInWithEmailAndPassword(FIREBASE_AUTH, username, password);
+            if ( FIREBASE_AUTH.currentUser && FIREBASE_AUTH.currentUser.emailVerified ) {
+                navigation.navigate('Home');
+                return;
+            } else {
+                alert('Email not verified');
+            }
+        } catch (error) {
+            console.log('Signin error: ' + error);
+        }
 
-            const user = userCredential.user;
+        // signInWithEmailAndPassword(FIREBASE_AUTH, username, password).then((userCredential) => {
 
-            navigation.navigate('Home')
+        //     const user = userCredential.user;
 
-        }).catch((error) => {
-            alert(error.message);
-        })
+        //     navigation.navigate('Home')
+
+        // }).catch((error) => {
+        //     alert(error.message);
+        // })
 
     }
 
 
     return (
         <View style={styles.mainContainer}>
-            <View style={styles.logoContainer}>
-                <Image source={logo} style={{height: 100, width: 100}} />
-            </View>
-            <View style={styles.inputContainer}>
-                <View style={{flex: 1, alignItems: 'center', justifyContent: 'space-evenly'}}>
-                    <TextInput style={styles.textInput} placeholder="Email" onChangeText={text => setUsername(text)}/>
-                    <TextInput secureTextEntry={true} style={[styles.textInput]} placeholder="Password" onChangeText={text => setPassword(text)} />
-                    <Pressable style={styles.pressableButton} onPress={handleLogin}>
-                        <Text style={{color: 'white'}}>Login</Text>
-                    </Pressable>
-                    <Pressable onPress={() => navigation.navigate('Signup')}>
-                        <Text style={styles.pressableText}>Create account</Text>
-                    </Pressable>
+            <KeyboardAvoidingView style={{flex: 1}} behavior="padding">
+                <View style={styles.logoContainer}>
+                    <Image source={logo} style={{height: 100, width: 100}} />
                 </View>
-            </View>
+                <View style={styles.inputContainer}>
+                    <View style={{flex: 1, alignItems: 'center', justifyContent: 'space-evenly'}}>
+                        <TextInput style={styles.textInput} placeholder="Email" onChangeText={text => setUsername(text)}/>
+                        <TextInput secureTextEntry={true} style={[styles.textInput]} placeholder="Password" onChangeText={text => setPassword(text)} />
+                        <Pressable style={styles.pressableButton} onPress={handleLogin}>
+                            <Text style={{color: 'white'}}>Login</Text>
+                        </Pressable>
+                        <Pressable onPress={() => navigation.navigate('Signup')}>
+                            <Text style={styles.pressableText}>Create account</Text>
+                        </Pressable>
+                    </View>
+                </View>
+            </KeyboardAvoidingView>
         </View>
     )
 }
