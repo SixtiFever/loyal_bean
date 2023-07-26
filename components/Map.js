@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { collection, doc, getDoc } from 'firebase/firestore';
 import { FIREBASE_DB } from '../firebase';
@@ -24,6 +24,8 @@ const Map = ( {navigation} ) => {
                 style={styles.map}
                 initialRegion={{ latitude: locations.exeterRegion.latitude, longitude: locations.exeterUni.longitude, latitudeDelta: 0.01, longitudeDelta: 0.01 }}
                 showsUserLocation={true}
+                followsUserLocation={true}
+                provider='google'
                 >
                 { Object.entries(cafeLocations).map((cafe) => {
                     return (
@@ -36,7 +38,7 @@ const Map = ( {navigation} ) => {
                             tappable={true} 
                             coordinate={{latitude: Number(geoCord[1]['lat']), longitude: Number(geoCord[1]['lng'])}}
                             onPress={() => alert('Cafe name\n' + cafe[0])}>
-                                <Ionicons name="md-cafe" size={24} color="#C20114" />
+                                <Ionicons name="md-cafe" size={24} color="#EB6424" />
                             </Marker>
                     )
                     })
@@ -62,6 +64,7 @@ const Map = ( {navigation} ) => {
                 style={styles.map}
                 initialRegion={{ latitude: locations.exeterRegion.latitude, longitude: locations.exeterUni.longitude, latitudeDelta: 0.01, longitudeDelta: 0.01 }}
                 showsUserLocation={true}
+                followsUserLocation={true}
                 >
             </MapView>
             </View>
@@ -79,31 +82,6 @@ const getCafeLocations = async () => {
     return cafeLocationsDocSnap;
 }
 
-
-// const CafeLocations = ({props}) => {
-
-//     const collectionRef = collection( FIREBASE_DB, 'data' );
-//     const cafeLoctationDocumentRef = doc( collectionRef, 'shop_locations' );
-//     getDoc(cafeLoctationDocumentRef).then((docSnap) => {
-//         let cafeLocationArray = [];
-//         for ( let cafe of Object.entries(docSnap.data()) ) {
-//             cafeLocationArray.push(cafe);
-//         }
-//         console.log('{Map} Retrieved from CafeLocations')
-//         return cafeLocationArray;
-//     }).catch((error) => {
-//         console.log('{Map} Error getting shop locations: ' + error);
-//     });
-//     return (
-//         <View>
-//             { console.log('{Map} Returning from CafeLocations') }
-//             <Marker tappable={true} onPress={() => { alert('Exeter region'); }} coordinate={locations.exeterUni}>
-//                 <Ionicons name="md-cafe" size={24} color="black" />
-//             </Marker>
-//         </View>
-//     )
-// }
-
 const styles = StyleSheet.create({
     mapContainer: {
         flex: 1,
@@ -111,7 +89,7 @@ const styles = StyleSheet.create({
     map : {
         height: '100%',
         width: '100%',
-    }
+    },
 })
 
 const locations = {

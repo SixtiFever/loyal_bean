@@ -8,7 +8,8 @@ import { getFirestore } from "firebase/firestore";
 import db, { FIREBASE_AUTH, FIREBASE_DB } from '../firebase';
 import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 
-const shopLogo = require('../assets/logos/grow_logo.png')
+const shopLogo = require('../assets/logos/grow_logo.png');
+// const scanSound = require('../assets/sounds/Barcode-scanner-beep-sound.mp3');
 
 const Home = ({navigation}) => {
 

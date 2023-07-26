@@ -27,25 +27,11 @@ const Signup = ({navigation}) => {
             } catch (error) {
                 console.log(error);
             }
-
-            // createUserWithEmailAndPassword(FIREBASE_AUTH, username, password).then((userCredential) => {
-            //     const user = userCredential.user;
-            //     return userCredential
-            // }).then( (userCredential) => {
-            //     sendEmailVerification(userCredential.user).then(() => {
-            //         console.log('In email verification function');
-            //     }).catch((error) => {
-            //         console.log(error);
-            //     }) 
-            //     console.log('After sendEmailVerfification');
-            // }).catch((error) => {
-            //     alert(error.message);
-            // });
         }
     }
 
     async function handleVerifyEmail(verificationCode) {
-        
+
     }
 
     return (

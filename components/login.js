@@ -25,16 +25,6 @@ const Login = ({navigation}) => {
             console.log('Signin error: ' + error);
         }
 
-        // signInWithEmailAndPassword(FIREBASE_AUTH, username, password).then((userCredential) => {
-
-        //     const user = userCredential.user;
-
-        //     navigation.navigate('Home')
-
-        // }).catch((error) => {
-        //     alert(error.message);
-        // })
-
     }
 
 

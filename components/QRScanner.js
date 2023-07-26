@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { collection, setDoc, doc, getDoc } from 'firebase/firestore';
 import { getDownloadURL, ref } from 'firebase/storage';
 import { FIREBASE_APP, FIREBASE_AUTH, FIREBASE_DB, FIREBASE_STORAGE } from '../firebase';
+import { Audio } from 'expo-av';
+
 
 const QRScanner = ({navigation}) => {
 
@@ -13,6 +15,7 @@ const QRScanner = ({navigation}) => {
     const [logoURI, setLogoURI] = useState("");
     const [userDoc, setUserDoc] = useState(null);
     const [userDocSize, setUserDocSize] = useState(0);
+    const [sound, setSound] = useState();
     let max, logo, userDocObj;
 
     /* on initial render get permissions and put all user data */
@@ -43,6 +46,26 @@ const QRScanner = ({navigation}) => {
 
     async function handleBarcodeScanned( {data} ) {
         setScanned(true);
+
+        // const { sound } = await Audio.Sound.createAsync( require('../assets/sounds/Barcode-scanner-beep-sound.mp3'));
+        // setSound(sound);
+        // await sound.playAsync();
+
+        const sound = new Audio.Sound();
+        await Audio.setAudioModeAsync({ playsInSilentModeIOS: true, })
+        try {
+            let playbackStatus = await sound.loadAsync(require('../assets/sounds/Barcode-scanner-beep-sound.mp3'), {
+                volume: 0.50,
+                shouldPlay: true,
+                isMuted: false,
+            });
+            await sound.setPositionAsync(0);
+            await sound.playAsync();
+
+            //await sound.unloadAsync();
+        } catch (error) {
+            console.log('Error playing sound: ' + error);
+        }
 
         // temp object to make local copy of user document snapshot
         let tempDoc = {  }
