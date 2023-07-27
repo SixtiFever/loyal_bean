@@ -1,7 +1,7 @@
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { View, Text, StyleSheet, Pressable, Image, ScrollView } from 'react-native';
 import { useEffect, useState, useCallback } from 'react';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import QRScanner from './QRScanner';
 import { collection, addDoc, doc, getDoc, FieldValue } from "firebase/firestore";
 import { getFirestore } from "firebase/firestore";
@@ -106,6 +106,10 @@ const Home = ({navigation}) => {
 
 const Card = (props) => {
     let logo = props.logo ? props.logo : shopLogo;
+    let maxArray = [];
+    for ( let i = 0; i < props.max; i++) {
+        maxArray.push(i);
+    }
     return (
         <View style={styles.cardBackground}>
             <View style={styles.cardLogoBackground}>
@@ -116,14 +120,30 @@ const Card = (props) => {
                     <Text>{props.name}</Text>
                 </View>
                 <View style={styles.tallyContainer}>
-                    <View style={styles.currentTally}>
+                    <View style={styles.circleIconContainerStyle}>
+                    {
+                        maxArray.map((ele) => {
+                            if ( ele < props.current ) {
+                                return (
+                                    <FontAwesome style={{marginStart: 6}} name="circle" size={24} color="#03B5AA" />
+                                )
+                            } else {
+                                return (
+                                    <FontAwesome style={{marginStart: 6}} name="circle-o" size={24} color="gray" />
+                                )
+                            }
+                        })
+                    }
+                    </View>
+                    
+                    {/* <View style={styles.currentTally}>
                         <Text>Current</Text>
                         <Text style={{fontSize: 28, fontWeight: '600'}}>{props.current}</Text>
                     </View>
                     <View style={styles.maxTally}>
                         <Text>Goal</Text>
                         <Text style={{fontSize: 28, fontWeight: '600'}}>{props.max}</Text>
-                    </View>
+                    </View> */}
                 </View>
             </View>
         </View>
@@ -242,8 +262,10 @@ const styles = StyleSheet.create({
     tallyContainer: {
         display: 'flex',
         flexDirection: 'row',
+        flexWrap: 'wrap',
         height: '70%',
         width: '100%',
+        paddingStart: 15,
     },
     titleContainer: {
         height: '30%',
@@ -292,6 +314,15 @@ const styles = StyleSheet.create({
           },
         }),
       },
+      circleIconContainerStyle : {
+        height: '100%',
+        width: '100%',
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        alignContent: 'center',
+        flexWrap: 'wrap',
+      }
 });
 
 export default Home;
