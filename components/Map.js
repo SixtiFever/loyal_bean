@@ -4,50 +4,60 @@ import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { collection, doc, getDoc } from 'firebase/firestore';
 import { FIREBASE_DB } from '../firebase';
+import * as Location from 'expo-location';
 
 const Map = ( {navigation} ) => {
 
     const [cafeLocations, setCafeLocations] = useState(null);
+    const [location, setLocation] = useState(null);
 
     useEffect(() => {
-        console.log('{Map} rendered map component');
         getCafeLocations().then((docSnap) => {
             setCafeLocations(docSnap.data());
-            console.log('Set locations array');
         });
+
+        ( async () => {
+            let { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+              setErrorMsg('Permission to access location was denied');
+              return;
+            }
+            console.log('Permission granted');
+            let location = await Location.getCurrentPositionAsync({});
+            setLocation(location);
+        })();
+
     }, [])
 
     if ( cafeLocations ) {
         return (
             <View style={styles.mapContainer}>
-            <MapView
-                style={styles.map}
-                initialRegion={{ latitude: locations.exeterRegion.latitude, longitude: locations.exeterUni.longitude, latitudeDelta: 0.01, longitudeDelta: 0.01 }}
-                showsUserLocation={true}
-                followsUserLocation={true}
-                provider='google'
-                >
-                { Object.entries(cafeLocations).map((cafe) => {
-                    return (
-                        Object.entries(cafe[1]['coordinates']).map((geoCord) => {
-                        console.log('Lat: ' + geoCord[1]['lat']);
-                        console.log('Long: ' + geoCord[1]['lng']);
+                <MapView
+                    style={styles.map}
+                    initialRegion={{ latitude:  location ? location['coords']['latitude'] :  50.72626830150681, longitude: location ? location['coords']['longitude'] :  -3.5253928152082454, latitudeDelta: 0.01, longitudeDelta: 0.01 }}
+                    showsUserLocation={true}
+                    followsUserLocation={true}
+                    provider='google'
+                    >
+                    { Object.entries(cafeLocations).map((cafe) => {
                         return (
-                            <Marker 
-                            key={Number(geoCord[1]['lat'])} 
-                            tappable={true} 
-                            coordinate={{latitude: Number(geoCord[1]['lat']), longitude: Number(geoCord[1]['lng'])}}
-                            onPress={() => alert('Cafe name\n' + cafe[0])}>
-                                <Ionicons name="md-cafe" size={24} color="#EB6424" />
-                            </Marker>
-                    )
-                    })
-                    )
-                    
-                    return;
-                })}
-            </MapView>
-        </View>
+                            Object.entries(cafe[1]['coordinates']).map((geoCord) => {
+                            return (
+                                <Marker 
+                                key={Number(geoCord[1]['lat'])} 
+                                tappable={true} 
+                                coordinate={{latitude: Number(geoCord[1]['lat']), longitude: Number(geoCord[1]['lng'])}}
+                                onPress={() => alert('Cafe name\n' + cafe[0])}>
+                                    <Ionicons name="md-cafe" size={24} color="#EB6424" />
+                                </Marker>
+                        )
+                        })
+                        )
+                        
+                        return;
+                    })}
+                </MapView>
+            </View>
         )
     } else {
         {

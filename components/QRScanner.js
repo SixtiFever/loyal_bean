@@ -17,6 +17,7 @@ const QRScanner = ({navigation}) => {
     const [userDocSize, setUserDocSize] = useState(0);
     const [sound, setSound] = useState();
     let max, logo, userDocObj;
+    let completedCard = false;
 
     /* on initial render get permissions and put all user data */
     useEffect(() => {
@@ -50,22 +51,21 @@ const QRScanner = ({navigation}) => {
         // const { sound } = await Audio.Sound.createAsync( require('../assets/sounds/Barcode-scanner-beep-sound.mp3'));
         // setSound(sound);
         // await sound.playAsync();
+        //const sound = new Audio.Sound();
+        // await Audio.setAudioModeAsync({ playsInSilentModeIOS: true, })
+        // try {
+        //     let playbackStatus = await sound.loadAsync(require('../assets/sounds/scanSound.mp3'), {
+        //         volume: 0.50,
+        //         shouldPlay: true,
+        //         isMuted: false,
+        //     });
+        //     await sound.setPositionAsync(0);
+        //     await sound.playAsync();
 
-        const sound = new Audio.Sound();
-        await Audio.setAudioModeAsync({ playsInSilentModeIOS: true, })
-        try {
-            let playbackStatus = await sound.loadAsync(require('../assets/sounds/Barcode-scanner-beep-sound.mp3'), {
-                volume: 0.50,
-                shouldPlay: true,
-                isMuted: false,
-            });
-            await sound.setPositionAsync(0);
-            await sound.playAsync();
-
-            //await sound.unloadAsync();
-        } catch (error) {
-            console.log('Error playing sound: ' + error);
-        }
+        //     // await sound.unloadAsync();
+        // } catch (error) {
+        //     console.log('Error playing sound: ' + error);
+        // }
 
         // temp object to make local copy of user document snapshot
         let tempDoc = {  }
@@ -75,13 +75,20 @@ const QRScanner = ({navigation}) => {
             tempDoc[prop] = userDoc.data()[data][prop];
         }
 
+        const sound = new Audio.Sound();
         // conditions for updating loyalty card data
         if ( Number(tempDoc['current']) >= Number(tempDoc['max']) ) {
             tempDoc['current'] = 0;
             tempDoc['most_recent'] = new Date().getTime();
+            playSound(sound, require('../assets/sounds/scanSound.mp3'));
         } else if ( Number(tempDoc['current']) < Number(tempDoc['max']) ) {
             tempDoc['current'] += 1;
             tempDoc['most_recent'] = new Date().getTime();
+            if ( Number(tempDoc['current']) == Number(tempDoc['max']) ) {
+                playSound(sound, require('../assets/sounds/dingLofi.mp3'));
+            } else {
+                playSound(sound, require('../assets/sounds/scanSound.mp3'));
+            }
         } else if ( tempDoc['current'] === undefined ) {
             // get shop document
             const collectionRef = collection( FIREBASE_DB, 'data' );
@@ -91,13 +98,11 @@ const QRScanner = ({navigation}) => {
                 tempDoc['logo'] = shopSnap.data()['logo'];
                 tempDoc['current'] = 1;
                 tempDoc['most_recent'] = new Date().getTime();
+                playSound(sound, require('../assets/sounds/scanSound.mp3'));
             }).catch((error) => console.log(error));
         }
 
         let newObj = { [data] : tempDoc }
-
-        console.log('Old object: ' + JSON.stringify(userDoc.data()));
-        console.log('New object: ' + JSON.stringify(newObj));
 
         // // set document
         const collectionRef = collection(FIREBASE_DB, 'data');
@@ -108,9 +113,6 @@ const QRScanner = ({navigation}) => {
         }).catch((error) => {
             console.log('Set doc error ' + error.message);
         })
-
-        // // if user has loyalty card
-        // console.log(JSON.stringify(userDocObj.data()));
     }
       
 
@@ -134,6 +136,22 @@ async function getShopData(collectionRef, shopName) {
     const docSnap = await getDoc(shopDocRef);
     const snapData = docSnap;
     return snapData;
+}
+
+async function playSound(sound, path) {
+    
+    await Audio.setAudioModeAsync( { playsInSilentModeIOS: true } );
+    try {
+        await sound.loadAsync(path, {
+            volume: 0.50,
+            shouldPlay: true,
+            isMuted: false,
+        });
+        await sound.setPositionAsync(0);
+        await sound.playAsync();
+    } catch (error) {
+        console.log('Error playing success sound: ' + error);
+    }
 }
 
 

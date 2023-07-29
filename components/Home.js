@@ -7,8 +7,10 @@ import { collection, addDoc, doc, getDoc, FieldValue } from "firebase/firestore"
 import { getFirestore } from "firebase/firestore";
 import db, { FIREBASE_AUTH, FIREBASE_DB } from '../firebase';
 import { useFocusEffect, useIsFocused } from "@react-navigation/native";
+import { Audio } from 'expo-av';
 
 const shopLogo = require('../assets/logos/grow_logo.png');
+const beanIcon = require('../assets/images/beanIcon.png');
 // const scanSound = require('../assets/sounds/Barcode-scanner-beep-sound.mp3');
 
 const Home = ({navigation}) => {
@@ -123,15 +125,18 @@ const Card = (props) => {
                     <View style={styles.circleIconContainerStyle}>
                     {
                         maxArray.map((ele) => {
+                            // if element is less than current tally, return a filled icon to represent coffee bought
                             if ( ele < props.current ) {
                                 return (
-                                    <FontAwesome style={{marginStart: 6}} name="circle" size={24} color="#03B5AA" />
+                                    <Image key={maxArray.indexOf(ele)} source={beanIcon} style={{height: 20, width: 20, marginStart: 6, tintColor: '#3C0919'}} />
+                                    // <FontAwesome key={maxArray.indexOf(ele)} style={{marginStart: 6}} name="circle" size={22} color="#03B5AA" />
                                 )
                             } else {
                                 return (
-                                    <FontAwesome style={{marginStart: 6}} name="circle-o" size={24} color="gray" />
+                                    <Image key={maxArray.indexOf(ele)} source={beanIcon} style={{height: 20, width: 20, marginStart: 6, tintColor: '#E4DFDA'}} />
+                                    // <FontAwesome key={maxArray.indexOf(ele)} style={{marginStart: 6}} name="circle-o" size={22} color="gray" />
                                 )
-                            }
+                            }   
                         })
                     }
                     </View>
@@ -151,7 +156,13 @@ const Card = (props) => {
 }
 
 const FreeCard = (props) => {
+
     const logo = props.logo ? props.logo : shopLogo;
+    let maxArray = [];
+    for ( let i = 0; i < props.max; i++) {
+        maxArray.push(i);
+    }
+
     return (
         <View style={styles.freeCardBackground}>
             <View style={styles.cardLogoBackground}>
@@ -162,9 +173,21 @@ const FreeCard = (props) => {
                     <Text>{props.name}</Text>
                 </View>
                 <View style={styles.tallyContainer}>
-                    <View style={{height: '100%', width: '100%', justifyContent: 'center', alignItems: 'center'}}>
-                        <Text style={{fontSize: 30, color: 'black'}}>Redeem Coffee</Text>
+                    <View style={styles.circleIconContainerStyle}>
+                    {
+                        maxArray.map((ele) => {
+                            
+                            return (
+                                <Image key={maxArray.indexOf(ele)} source={beanIcon} style={{height: 20, width: 20, marginStart: 6, tintColor: '#EC9F05'}} />
+                                // <FontAwesome key={maxArray.indexOf(ele)} style={{marginStart: 6}} name="circle" size={22} color="#03B5AA" />
+                            )
+
+                        })
+                    }
                     </View>
+                    {/* <View style={{height: '100%', width: '100%', justifyContent: 'center', alignItems: 'center'}}>
+                        <Text style={{fontSize: 30, color: 'black'}}>Redeem Coffee</Text>
+                    </View> */}
                 </View>
             </View>
         </View>
@@ -179,6 +202,23 @@ async function getUserDocument() {
     const docSnap = await getDoc(docRef);
     return docSnap;
 }
+
+// async function playSuccessSound() {
+//     const sound = new Audio.Sound();
+//     await Audio.setAudioModeAsync( { playsInSilentModeIOS: true } );
+//     try {
+//         await sound.loadAsync(require('../assets/sounds/successSound.mp3'), {
+//             volume: 0.50,
+//             shouldPlay: true,
+//             isMuted: false,
+//         });
+//         await sound.setPositionAsync(0);
+//         await sound.playAsync();
+
+//     } catch (error) {
+//         console.log('Error playing success sound: ' + error);
+//     }
+// }
 
 const styles = StyleSheet.create({
     mainBackground: {
@@ -265,7 +305,6 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         height: '70%',
         width: '100%',
-        paddingStart: 15,
     },
     titleContainer: {
         height: '30%',
@@ -289,7 +328,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-evenly',
     },
     freeCardBackground: {
-        backgroundColor: 'gold',
+        backgroundColor: 'white',
         borderRadius: 8,
         padding: 4,
         width: '92%',
@@ -301,12 +340,12 @@ const styles = StyleSheet.create({
         // Shadow properties
         ...Platform.select({
           ios: {
-            shadowColor: '#000000',
+            shadowColor: '#EC9F05',
             shadowOffset: {
               width: 0,
-              height: 2,
+              height: 0,
             },
-            shadowOpacity: 0.3,
+            shadowOpacity: .5,
             shadowRadius: 4,
           },
           android: {
@@ -318,7 +357,7 @@ const styles = StyleSheet.create({
         height: '100%',
         width: '100%',
         flexDirection: 'row',
-        justifyContent: 'flex-start',
+        justifyContent: 'center',
         alignItems: 'center',
         alignContent: 'center',
         flexWrap: 'wrap',
