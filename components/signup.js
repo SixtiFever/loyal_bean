@@ -2,7 +2,7 @@ import { StyleSheet, View, TextInput, Pressable, Text, Image, KeyboardAvoidingVi
 import { getAuth, createUserWithEmailAndPassword, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, sendEmailVerification } from "firebase/auth";
 import { useState } from 'react';
 import { FIREBASE_APP, FIREBASE_AUTH, FIREBASE_DB } from "../firebase";
-import { collection, setDoc, doc } from "firebase/firestore";
+import { collection, setDoc, doc, getDoc } from "firebase/firestore";
 
 const logo = require('/Users/JDSwift/Desktop/react-native/login-portal/assets/lb_logo.png');
 
@@ -16,22 +16,22 @@ const Signup = ({navigation}) => {
     async function handleSignup() {
 
         if ((!username || !password || !confirmPassword) || (password != confirmPassword)) {
-            alert('Signup error. Ensure a university email is used, and all fields are correctly filled.');
+            alert('Signup error.');
         } else {
+
+            const collectionRef = collection(FIREBASE_DB, 'data');
 
             try {
                 let userCredential = await createUserWithEmailAndPassword(FIREBASE_AUTH, username, password);
-                await sendEmailVerification(userCredential.user);
-                alert('Email verified. You may now sign in.');
+                await sendEmailVerification(userCredential.user).then( () => {
+                    const docRef = doc(collectionRef, userCredential.user.email);
+                    setDoc(docRef, { 'total_score' : 0 }, {merge: true});
+                });
 
             } catch (error) {
                 console.log(error);
             }
         }
-    }
-
-    async function handleVerifyEmail(verificationCode) {
-
     }
 
     return (
@@ -58,14 +58,6 @@ const Signup = ({navigation}) => {
     )
 }
 
-
-const hasEmailFormat = (email) => {
-    let uniEmailFormat = ".ac.uk"
-    if ( email.includes(uniEmailFormat) ) {
-        console.log('Correct uni formatted email');
-        return true;
-    }
-}
 
 const styles = StyleSheet.create({
     mainContainer: {

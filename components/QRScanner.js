@@ -48,25 +48,6 @@ const QRScanner = ({navigation}) => {
     async function handleBarcodeScanned( {data} ) {
         setScanned(true);
 
-        // const { sound } = await Audio.Sound.createAsync( require('../assets/sounds/Barcode-scanner-beep-sound.mp3'));
-        // setSound(sound);
-        // await sound.playAsync();
-        //const sound = new Audio.Sound();
-        // await Audio.setAudioModeAsync({ playsInSilentModeIOS: true, })
-        // try {
-        //     let playbackStatus = await sound.loadAsync(require('../assets/sounds/scanSound.mp3'), {
-        //         volume: 0.50,
-        //         shouldPlay: true,
-        //         isMuted: false,
-        //     });
-        //     await sound.setPositionAsync(0);
-        //     await sound.playAsync();
-
-        //     // await sound.unloadAsync();
-        // } catch (error) {
-        //     console.log('Error playing sound: ' + error);
-        // }
-
         // temp object to make local copy of user document snapshot
         let tempDoc = {  }
 
@@ -80,16 +61,20 @@ const QRScanner = ({navigation}) => {
         if ( Number(tempDoc['current']) >= Number(tempDoc['max']) ) {
             tempDoc['current'] = 0;
             tempDoc['most_recent'] = new Date().getTime();
+            tempDoc['user_shop_score'] += 1;
             playSound(sound, require('../assets/sounds/scanSound.mp3'));
         } else if ( Number(tempDoc['current']) < Number(tempDoc['max']) ) {
             tempDoc['current'] += 1;
             tempDoc['most_recent'] = new Date().getTime();
+            tempDoc['user_shop_score'] += 1;
             if ( Number(tempDoc['current']) == Number(tempDoc['max']) ) {
                 playSound(sound, require('../assets/sounds/dingLofi.mp3'));
             } else {
                 playSound(sound, require('../assets/sounds/scanSound.mp3'));
             }
-        } else if ( tempDoc['current'] === undefined ) {
+        } else if ( tempDoc['current'] === undefined ) { // if the tempDoc is undefined due to not being a shop document in user field,
+            // then get the shop document data, and input the data needed for a loyalty card instance creation. Then set the document
+            // to create the loyalty card in the user document.
             // get shop document
             const collectionRef = collection( FIREBASE_DB, 'data' );
             // get shop data needed to create loyalty card for user ( name, logo, current, max )
@@ -98,6 +83,7 @@ const QRScanner = ({navigation}) => {
                 tempDoc['logo'] = shopSnap.data()['logo'];
                 tempDoc['current'] = 1;
                 tempDoc['most_recent'] = new Date().getTime();
+                tempDoc['user_shop_score'] = 1;
                 playSound(sound, require('../assets/sounds/scanSound.mp3'));
             }).catch((error) => console.log(error));
         }

@@ -46,8 +46,10 @@ const Home = ({navigation}) => {
                 let coffeeShopObjects = [];
                 // iterates coffee shops in the users document
                 Object.entries( userDocSnap.data() ).forEach( ([coffeeShop, coffeeShopData]) => {
-                    coffeeShopObjects.push({ 'name' : coffeeShop, 'current' : coffeeShopData.current, 'max' : coffeeShopData.max, 'timestamp' : coffeeShopData.most_recent, 'logo' : coffeeShopData.logo });
-                    console.log('{Home} Pushing ' + coffeeShop + ' to CoffeeShop array.')
+                    if( !coffeeShop.includes('total_score') ) {
+                        coffeeShopObjects.push({ 'name' : coffeeShop, 'current' : coffeeShopData.current, 'max' : coffeeShopData.max, 'timestamp' : coffeeShopData.most_recent, 'logo' : coffeeShopData.logo });
+                        console.log('{Home} Pushing ' + coffeeShop + ' to CoffeeShop array.')
+                    }
                 });
                 return coffeeShopObjects;
             }).then( coffeeShopObjects => {
@@ -129,26 +131,15 @@ const Card = (props) => {
                             if ( ele < props.current ) {
                                 return (
                                     <Image key={maxArray.indexOf(ele)} source={beanIcon} style={{height: 20, width: 20, marginStart: 6, tintColor: '#3C0919'}} />
-                                    // <FontAwesome key={maxArray.indexOf(ele)} style={{marginStart: 6}} name="circle" size={22} color="#03B5AA" />
                                 )
                             } else {
                                 return (
                                     <Image key={maxArray.indexOf(ele)} source={beanIcon} style={{height: 20, width: 20, marginStart: 6, tintColor: '#E4DFDA'}} />
-                                    // <FontAwesome key={maxArray.indexOf(ele)} style={{marginStart: 6}} name="circle-o" size={22} color="gray" />
                                 )
                             }   
                         })
                     }
                     </View>
-                    
-                    {/* <View style={styles.currentTally}>
-                        <Text>Current</Text>
-                        <Text style={{fontSize: 28, fontWeight: '600'}}>{props.current}</Text>
-                    </View>
-                    <View style={styles.maxTally}>
-                        <Text>Goal</Text>
-                        <Text style={{fontSize: 28, fontWeight: '600'}}>{props.max}</Text>
-                    </View> */}
                 </View>
             </View>
         </View>
@@ -179,15 +170,11 @@ const FreeCard = (props) => {
                             
                             return (
                                 <Image key={maxArray.indexOf(ele)} source={beanIcon} style={{height: 20, width: 20, marginStart: 6, tintColor: '#EC9F05'}} />
-                                // <FontAwesome key={maxArray.indexOf(ele)} style={{marginStart: 6}} name="circle" size={22} color="#03B5AA" />
                             )
 
                         })
                     }
                     </View>
-                    {/* <View style={{height: '100%', width: '100%', justifyContent: 'center', alignItems: 'center'}}>
-                        <Text style={{fontSize: 30, color: 'black'}}>Redeem Coffee</Text>
-                    </View> */}
                 </View>
             </View>
         </View>
@@ -203,22 +190,6 @@ async function getUserDocument() {
     return docSnap;
 }
 
-// async function playSuccessSound() {
-//     const sound = new Audio.Sound();
-//     await Audio.setAudioModeAsync( { playsInSilentModeIOS: true } );
-//     try {
-//         await sound.loadAsync(require('../assets/sounds/successSound.mp3'), {
-//             volume: 0.50,
-//             shouldPlay: true,
-//             isMuted: false,
-//         });
-//         await sound.setPositionAsync(0);
-//         await sound.playAsync();
-
-//     } catch (error) {
-//         console.log('Error playing success sound: ' + error);
-//     }
-// }
 
 const styles = StyleSheet.create({
     mainBackground: {
