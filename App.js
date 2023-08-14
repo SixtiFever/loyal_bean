@@ -12,6 +12,7 @@ import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -43,12 +44,23 @@ const ScreenStack = () => {
 
 const TabNavigation = () => {
     return (
-        <Tab.Navigator>
-            <Tab.Screen options={{title: 'Loyalty cards', unmountOnBlur: true,
+        <Tab.Navigator screenOptions={{
+            tabBarStyle: {
+                height: '10%'
+            }
+        }}>
+            <Tab.Screen options={{title: 'Loyalty cards', unmountOnBlur: true, tabBarIcon: () => {
+                return ( <MaterialCommunityIcons style={{textAlignVertical: 'center'}} name="card-multiple-outline" size={32} color="black" /> )
+            },
                 headerRight: () => { return <LocationPressable /> },
-                headerLeft: () => { return <Logout /> }}}  name='TabHome' component={Home} />
-            <Tab.Screen options={{unmountOnBlur: true}} name='Scan' component={QRScanner} />
-            <Tab.Screen options={{unmountOnBlur: true}} name='Beans' component={Beans} />
+                headerLeft: () => { return <Logout /> },
+                }}  name='TabHome' component={Home} />
+            <Tab.Screen options={{unmountOnBlur: true, tabBarIcon: () => { 
+                return <Ionicons name="scan" size={32} color="black" /> },
+                }} name='Scan' component={QRScanner} />
+            <Tab.Screen options={{unmountOnBlur: true, tabBarIcon: () => {
+                return (<MaterialCommunityIcons name="progress-star" size={32} color="black" />)
+            }, title: 'Points'}} name='Beans' component={Beans} />
         </Tab.Navigator>
     )
 }
