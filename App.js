@@ -1,17 +1,23 @@
 import app, { FIREBASE_AUTH } from './firebase';
 import { StatusBar } from 'expo-status-bar';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View, Image } from 'react-native';
 import Login from './components/login';
 import Signup from './components/signup';
 import Home from './components/Home';
 import Map  from "./components/Map";
 import Settings from './components/Settings';
 import QRScanner from './components/QRScanner';
+import Beans from './components/Beans';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 
+const Stack = createStackNavigator();
+const Tab = createBottomTabNavigator();
+
 export default function App() {
+
   return (
     <NavigationContainer>
         <ScreenStack />
@@ -19,7 +25,6 @@ export default function App() {
   );
 }
 
-const Stack = createStackNavigator();
 
 const ScreenStack = () => {
     return (
@@ -27,15 +32,24 @@ const ScreenStack = () => {
             <Stack.Screen name='Login' component={Login} />
             <Stack.Screen name='Signup' component={Signup} />
             <Stack.Screen 
-            options={{title: 'Your loyalty cards', 
-                headerRight: () => { return <LocationPressable /> },
-            headerLeft: () => { return <Logout /> } }} 
-            name='Home' component={Home} />
-            <Stack.Screen name='QRScanner' component={QRScanner} />
-            <Stack.Screen name='Map' component={Map} />
+            options={{ headerShown: false }}
+            name='StackHome' component={TabNavigation} />
+            <Stack.Screen options={{ headerBackTitle: 'Loyalty cards' }} name='Map' component={Map} />
             <Stack.Screen name='LocationPressable' component={LocationPressable} />
-            <Stack.Screen name='Settings' component={Settings} />
+            <Stack.Screen options={{ headerBackTitle: 'Loyalty cards' }} name='Settings' component={Settings} />
         </Stack.Navigator>
+    )
+}
+
+const TabNavigation = () => {
+    return (
+        <Tab.Navigator>
+            <Tab.Screen options={{title: 'Loyalty cards', unmountOnBlur: true,
+                headerRight: () => { return <LocationPressable /> },
+                headerLeft: () => { return <Logout /> }}}  name='TabHome' component={Home} />
+            <Tab.Screen options={{unmountOnBlur: true}} name='Scan' component={QRScanner} />
+            <Tab.Screen options={{unmountOnBlur: true}} name='Beans' component={Beans} />
+        </Tab.Navigator>
     )
 }
 

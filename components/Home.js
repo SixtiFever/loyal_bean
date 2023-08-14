@@ -8,10 +8,12 @@ import { getFirestore } from "firebase/firestore";
 import db, { FIREBASE_AUTH, FIREBASE_DB } from '../firebase';
 import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 import { Audio } from 'expo-av';
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import Map from "./Map";
+import Settings from "./Settings";
 
 const shopLogo = require('../assets/logos/grow_logo.png');
 const beanIcon = require('../assets/images/beanIcon.png');
-// const scanSound = require('../assets/sounds/Barcode-scanner-beep-sound.mp3');
 
 const Home = ({navigation}) => {
 
@@ -98,15 +100,11 @@ const Home = ({navigation}) => {
                         })}
                     </ScrollView>
                 </View>
-                <View style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                    <Pressable style={styles.scanButton} onPress={()=> navigation.navigate('QRScanner')}>
-                        <Ionicons name="scan" size={42} color="black" />
-                    </Pressable>
-                </View>
             </View>
         )
     }
 }
+
 
 const Card = (props) => {
     let logo = props.logo ? props.logo : shopLogo;

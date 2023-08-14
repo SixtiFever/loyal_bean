@@ -5,6 +5,7 @@ import { collection, setDoc, doc, getDoc } from 'firebase/firestore';
 import { getDownloadURL, ref } from 'firebase/storage';
 import { FIREBASE_APP, FIREBASE_AUTH, FIREBASE_DB, FIREBASE_STORAGE } from '../firebase';
 import { Audio } from 'expo-av';
+import { useFocusEffect } from '@react-navigation/native';
 
 
 const QRScanner = ({navigation}) => {
@@ -94,8 +95,8 @@ const QRScanner = ({navigation}) => {
         const collectionRef = collection(FIREBASE_DB, 'data');
         const userDocRef = doc(collectionRef, FIREBASE_AUTH.currentUser.email);
         await setDoc( userDocRef , newObj , {merge: true} ).then(() => {
-            console.log('Set doc success');
-            return navigation.navigate('Home');
+            console.log('{QRScanner: Going back...}')
+            return navigation.goBack();
         }).catch((error) => {
             console.log('Set doc error ' + error.message);
         })
