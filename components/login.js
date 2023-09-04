@@ -42,7 +42,7 @@ const Login = ({navigation}) => {
                             <Text style={{color: 'white'}}>Login</Text>
                         </Pressable>
                         <Pressable onPress={() => navigation.navigate('Signup')}>
-                            <Text style={styles.pressableText}>Create account</Text>
+                            <Text style={styles.pressableText}>Create user account</Text>
                         </Pressable>
                     </View>
                 </View>

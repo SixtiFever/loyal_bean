@@ -8,11 +8,13 @@ import Map  from "./components/Map";
 import Settings from './components/Settings';
 import QRScanner from './components/QRScanner';
 import Beans from './components/Beans';
+import ShopRegister from './components/ShopRegister';
+import ShopSignin from './components/ShopSignin';
+import ShopSignup from './components/ShopSignup';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Ionicons } from '@expo/vector-icons';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons, Entypo, MaterialCommunityIcons } from '@expo/vector-icons';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -30,7 +32,9 @@ export default function App() {
 const ScreenStack = () => {
     return (
         <Stack.Navigator>
-            <Stack.Screen name='Login' component={Login} />
+            <Stack.Screen options={{
+                headerRight: () => { return <ShopPortalPressable />},
+            }} name='Login' component={Login} />
             <Stack.Screen name='Signup' component={Signup} />
             <Stack.Screen 
             options={{ headerShown: false }}
@@ -38,6 +42,12 @@ const ScreenStack = () => {
             <Stack.Screen options={{ headerBackTitle: 'Loyalty cards' }} name='Map' component={Map} />
             <Stack.Screen name='LocationPressable' component={LocationPressable} />
             <Stack.Screen options={{ headerBackTitle: 'Loyalty cards' }} name='Settings' component={Settings} />
+            <Stack.Screen options={{
+                title: 'Shop Signin'
+            }} name='ShopSignin' component={ShopSignin} />
+            <Stack.Screen options={{
+                title: 'Shop Registration'
+            }} name='ShopSignup' component={ShopSignup} />
         </Stack.Navigator>
     )
 }
@@ -80,6 +90,15 @@ const LocationPressable = () => {
     return (
         <Pressable style={styles.locationIcon} onPress={() => { navigation.navigate('Map')}}>
             <Ionicons name="ios-location-outline" size={28} color="black" />
+        </Pressable>
+    )
+}
+
+const ShopPortalPressable = () => {
+    const navigation = useNavigation();
+    return (
+        <Pressable onPress={() => { navigation.navigate('ShopSignin') }}>
+            <Entypo name="shop" size={24} color="black" />
         </Pressable>
     )
 }

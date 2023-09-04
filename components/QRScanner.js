@@ -16,9 +16,6 @@ const QRScanner = ({navigation}) => {
     const [logoURI, setLogoURI] = useState("");
     const [userDoc, setUserDoc] = useState(null);
     const [userDocSize, setUserDocSize] = useState(0);
-    const [sound, setSound] = useState();
-    let max, logo, userDocObj;
-    let completedCard = false;
 
     /* on initial render get permissions and put all user data */
     useEffect(() => {
@@ -73,7 +70,7 @@ const QRScanner = ({navigation}) => {
             } else {
                 playSound(sound, require('../assets/sounds/scanSound.mp3'));
             }
-        } else if ( tempDoc['current'] === undefined ) { // if the tempDoc is undefined due to not being a shop document in user field,
+        } else if ( tempDoc['current'] === undefined ) { // if the tempDoc is undefined due to not being a shop field in user document,
             // then get the shop document data, and input the data needed for a loyalty card instance creation. Then set the document
             // to create the loyalty card in the user document.
             // get shop document
@@ -91,7 +88,7 @@ const QRScanner = ({navigation}) => {
 
         let newObj = { [data] : tempDoc }
 
-        // // set document
+        // set / merge the user document document
         const collectionRef = collection(FIREBASE_DB, 'data');
         const userDocRef = doc(collectionRef, FIREBASE_AUTH.currentUser.email);
         await setDoc( userDocRef , newObj , {merge: true} ).then(() => {

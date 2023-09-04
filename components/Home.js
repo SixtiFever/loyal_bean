@@ -11,6 +11,7 @@ import { Audio } from 'expo-av';
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Map from "./Map";
 import Settings from "./Settings";
+import { styleProps } from "react-native-web/dist/cjs/modules/forwardedProps";
 
 const shopLogo = require('../assets/logos/grow_logo.png');
 const beanIcon = require('../assets/images/beanIcon.png');
@@ -48,8 +49,10 @@ const Home = ({navigation}) => {
                 let coffeeShopObjects = [];
                 // iterates coffee shops in the users document
                 Object.entries( userDocSnap.data() ).forEach( ([coffeeShop, coffeeShopData]) => {
+                    // skip the total_score field in the users document
                     if( !coffeeShop.includes('total_score') ) {
-                        coffeeShopObjects.push({ 'name' : coffeeShop, 'current' : coffeeShopData.current, 'max' : coffeeShopData.max, 'timestamp' : coffeeShopData.most_recent, 'logo' : coffeeShopData.logo });
+                        coffeeShopObjects.push({ 'name' : coffeeShop, 'current' : coffeeShopData.current, 'max' : coffeeShopData.max,
+                         'timestamp' : coffeeShopData.most_recent, 'logo' : coffeeShopData.logo, 'beans' : coffeeShopData.user_shop_score });
                         console.log('{Home} Pushing ' + coffeeShop + ' to CoffeeShop array.')
                     }
                 });
@@ -94,6 +97,7 @@ const Home = ({navigation}) => {
                                         current={item.current}
                                         max={item.max}
                                         logo={item.logo}
+                                        beans={item.beans}
                                     />
                                 )
                             }
@@ -138,6 +142,9 @@ const Card = (props) => {
                         })
                     }
                     </View>
+                    <View style={styles.cardPointsContainer}>
+                        <Text onPress={showPointsInfo}>Points: {props.beans}</Text>
+                    </View>
                 </View>
             </View>
         </View>
@@ -173,6 +180,9 @@ const FreeCard = (props) => {
                         })
                     }
                     </View>
+                    <View style={styles.cardPointsContainer}>
+                        <Text onPress={showPointsInfo}>Points: {props.beans}</Text>
+                    </View>
                 </View>
             </View>
         </View>
@@ -186,6 +196,10 @@ async function getUserDocument() {
     const docRef = doc( collectionRef, FIREBASE_AUTH.currentUser.email );
     const docSnap = await getDoc(docRef);
     return docSnap;
+}
+
+function showPointsInfo() {
+    alert('The loyalty points you\'ve earned at this shop.');
 }
 
 
@@ -208,7 +222,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         padding: 4,
         width: '92%',
-        height: 120,
+        height: 150,
         display: 'flex',
         flexDirection: 'row',
         alignContent: 'space-between',
@@ -272,8 +286,15 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'row',
         flexWrap: 'wrap',
-        height: '70%',
+        height: '50%',
         width: '100%',
+    },
+    cardPointsContainer: {
+        display: 'flex',
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        width: '100%',
+        alignContent: 'center',
     },
     titleContainer: {
         height: '30%',
