@@ -3,8 +3,9 @@ import {Text, View, Button, KeyboardAvoidingView, StyleSheet, TextInput, Pressab
 import NumericInput from 'react-native-numeric-input';
 import * as ImagePicker from 'expo-image-picker';
 import { FIREBASE_DB, FIREBASE_STORAGE } from '../firebase';
-import { ref, uploadBytes, uploadString } from 'firebase/storage';
+import { getDownloadURL, ref, uploadBytes, uploadString } from 'firebase/storage';
 import QRCode from 'react-native-qrcode-svg';
+import { collection, getDoc, setDoc, doc } from 'firebase/firestore';
 
 global.Buffer = require('buffer').Buffer;
 
@@ -19,6 +20,16 @@ class Shop {
         this.shopAddress = shopAddress;
         this.maxCoffees = maxCoffees;
         this.logo = logo;
+        this.qrLink = '';
+        this.logoUrl = '';
+    }
+
+    setQRLink(url) {
+        this.qrLink = url;
+    }
+
+    setLogoUrl(url) {
+        this.logoUrl = url;
     }
 }
 
@@ -59,17 +70,44 @@ const ShopSignup = ({navigation}) => {
         const blob = await response.blob();
         // upload to storage
         await uploadBytes(logoStorageRef, blob);
+        await getDownloadURL( logoStorageRef ).then( url => {
+            shop.setLogoUrl(url);
+        })
         console.log('logo uploaded');
 
         // generate qr code
         const shopStorageRef = ref( FIREBASE_STORAGE, `${shop.shopName}/${shop.shopName}_QRCodeLink.txt` );
         let qrLink = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + shopName;
+        shop.setQRLink(qrLink)
         const qrLinkBuffer = Buffer.from(qrLink);
         await uploadBytes(shopStorageRef, qrLinkBuffer, { contentType: 'text/plain' }).then(() => {
             alert('Your shops QR Code has been generated. View it in your profile.');
         }).catch((error) => {
             console.log('Error uploading qr link: ' + error);
         });
+
+        console.log(shop);
+        // send all data to firestore
+        const collectionRef = collection( FIREBASE_DB, 'data' );
+        const docRef = doc( collectionRef, shopName );
+        await setDoc( docRef, {
+                        'shop_name': shop.shopName,
+                        'shop_email': shop.shopEmail,
+                        'shop_number': shop.shopNumber,
+                        'contact_name': shop.contactName,
+                        'contact_email': shop.contactEmail,
+                        'contact_number': shop.contactNumber,
+                        'shop_address' : shop.shopAddress,
+                        'max_tally': shop.maxCoffees,
+                        'logo': shop.logoUrl,
+                        'qr_code_bytes': shop.qrLink,
+        } ).then(() => {
+            console.log('Shop doc uploaded');
+        }).catch((error) => {
+            console.log('Error uploading shop document: ' + error);
+        });
+
+
 
 
     }
@@ -97,9 +135,6 @@ const ShopSignup = ({navigation}) => {
                     <Button title="Upload shop logo" onPress={pickImage} />
                     {logo && <Image source={{ uri: logo }} style={{ width: 200, height: 200 }} />}
                     <Button title="Clear" onPress={() => { setLogo(null) }} />
-                    {/* { shopName ? renderQrCode(shopName) : null } */}
-
-
                     <Pressable style={styles.pressableButton} onPress={handleRegister}>
                         <Text>Register shop</Text>
                     </Pressable>
