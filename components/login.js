@@ -57,6 +57,7 @@ const Login = ({navigation}) => {
 const styles = StyleSheet.create({
     mainContainer: {
         flex: 1,
+        backgroundColor: '#FFFEF9',
     },
     logoContainer: {
         flex: 1,

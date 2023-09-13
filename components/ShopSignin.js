@@ -29,7 +29,7 @@ const ShopSignin = ({navigation}) => {
     }
 
     return (
-        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFEF9'}}>
             <View style={styles.logoContainer}>
                     <Image source={logo} style={{height: 100, width: 100}} />
                 </View>

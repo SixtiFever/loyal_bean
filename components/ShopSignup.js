@@ -160,7 +160,7 @@ const ShopSignup = ({navigation}) => {
 
 
     return (
-        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFEF9'}}>
             <ScrollView contentContainerStyle={{alignItems:'center'}} style={{flex: 1, width: '100%'}}>
                 <KeyboardAvoidingView style={{display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'center'}} behavior="padding">
                     <TextInput style={styles.textInput} placeholder="Shop name" onChangeText={text => setShopName(text)}/>
