@@ -23,10 +23,12 @@ const Signup = ({navigation}) => {
 
             try {
                 let userCredential = await createUserWithEmailAndPassword(FIREBASE_AUTH, username, password);
-                await sendEmailVerification(userCredential.user).then( () => {
-                    const docRef = doc(collectionRef, userCredential.user.email);
+                const docRef = doc(collectionRef, userCredential.user.email);
                     setDoc(docRef, { 'total_score' : 0 }, {merge: true});
-                });
+                // await sendEmailVerification(userCredential.user).then( () => {
+                //     const docRef = doc(collectionRef, userCredential.user.email);
+                //     setDoc(docRef, { 'total_score' : 0 }, {merge: true});
+                // });
 
             } catch (error) {
                 console.log(error);

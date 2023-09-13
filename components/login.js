@@ -15,7 +15,8 @@ const Login = ({navigation}) => {
 
         try {
             await signInWithEmailAndPassword(FIREBASE_AUTH, username, password);
-            if ( FIREBASE_AUTH.currentUser && FIREBASE_AUTH.currentUser.emailVerified ) {
+            // if ( FIREBASE_AUTH.currentUser && FIREBASE_AUTH.currentUser.emailVerified )
+            if ( FIREBASE_AUTH.currentUser ) {
                 navigation.navigate('StackHome');
                 return;
             } else {

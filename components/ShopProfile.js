@@ -8,6 +8,8 @@ const ShopProfile = ({navigation}) => {
 
     const [shopEmail, setShopEmail] = React.useState('');
     const [shopObject, setShopObject] = React.useState(null);
+    const [stateCustomerArray, setStateCustomerArray] = React.useState(null);
+    let customerArray = [];
 
     onAuthStateChanged(FIREBASE_AUTH, (shop) => {
         if ( shop ) {
@@ -34,7 +36,10 @@ const ShopProfile = ({navigation}) => {
                             if ( doc.data()['shop_email'].toLowerCase() == shopEmail.toLowerCase() ) {
                                 // assign shop object to variable
                                 setShopObject(doc.data());
-                                console.log(shopObject);
+                                for ( let customer of Object.entries(doc.data()['customers']) ) {
+                                    customerArray.push(customer);
+                                }
+                                setStateCustomerArray(customerArray);
                                 return;
                             }
                         }
@@ -59,7 +64,13 @@ const ShopProfile = ({navigation}) => {
             <Text>Contact name: { shopObject ? shopObject.contact_name : 'Issue retrieving shop contact name' }</Text>
             <Text>Contact name: { shopObject ? shopObject.contact_email : 'Issue retrieving shop contact email' }</Text>
             <Text>Contact name: { shopObject ? shopObject.contact_number : 'Issue retrieving shop contact number' }</Text>
-            <Image source={shopObject['logo']} style={{width: 100, height: 100}} />
+            <Text>Customer stats:</Text>
+            { stateCustomerArray.map( customer => {
+                return (
+                    <Text>{customer[0]} : { customer[1]['scans'] }</Text>
+                )
+                
+            }) }
         </View>
     )
 }

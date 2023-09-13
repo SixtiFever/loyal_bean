@@ -99,16 +99,19 @@ const QRScanner = ({navigation}) => {
             tempShopObj = snap.data()['customers'];
             // if the customer hasnt visited the shop before
             if ( !tempShopObj[FIREBASE_AUTH.currentUser.email] ) {
-                tempShopObj[FIREBASE_AUTH.currentUser.email]['scans'] = Number(1);
+                tempShopObj[FIREBASE_AUTH.currentUser.email] = { 'scans' : 1 };
             } else {
                 let count = tempShopObj[FIREBASE_AUTH.currentUser.email]['scans'] + 1;
                 tempShopObj[FIREBASE_AUTH.currentUser.email]['scans'] = Number(count);
             }
+            console.log(tempShopObj);
         }).catch( error => {
             console.log('Error getting shop data (QRScanner.js/98): ' + error);
         });
         
-        await setDoc( shopDocRef, { 'customers': { [FIREBASE_AUTH.currentUser.email] :  tempShopObj[FIREBASE_AUTH.currentUser.email]  } }, {merge: true} );
+        await setDoc( shopDocRef, { 'customers': { [FIREBASE_AUTH.currentUser.email] :  tempShopObj[FIREBASE_AUTH.currentUser.email]  } }, {merge: true} ).catch(error => {
+            console.log('Error ( QRScanner / 113 ) : ' + error);
+        });
 
         // set / merge the user document document
         const userDocRef = doc(collectionRef, FIREBASE_AUTH.currentUser.email);
