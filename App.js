@@ -8,9 +8,10 @@ import Map  from "./components/Map";
 import Settings from './components/Settings';
 import QRScanner from './components/QRScanner';
 import Beans from './components/Beans';
-import ShopRegister from './components/ShopRegister';
+import ShopProfile from './components/ShopProfile';
 import ShopSignin from './components/ShopSignin';
 import ShopSignup from './components/ShopSignup';
+
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -48,6 +49,8 @@ const ScreenStack = () => {
             <Stack.Screen options={{
                 title: 'Shop Registration'
             }} name='ShopSignup' component={ShopSignup} />
+            <Stack.Screen options={{title: 'Shop Profile'}}
+                name='ShopProfile' component={ShopProfile} />
         </Stack.Navigator>
     )
 }

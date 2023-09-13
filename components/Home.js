@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Pressable, Image, ScrollView } from 'react-nati
 import { useEffect, useState, useCallback } from 'react';
 import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import QRScanner from './QRScanner';
-import { collection, addDoc, doc, getDoc, FieldValue } from "firebase/firestore";
+import { collection, addDoc, doc, getDoc, FieldValue, getDocs } from "firebase/firestore";
 import { getFirestore } from "firebase/firestore";
 import db, { FIREBASE_AUTH, FIREBASE_DB } from '../firebase';
 import { useFocusEffect, useIsFocused } from "@react-navigation/native";
@@ -36,28 +36,45 @@ const Home = ({navigation}) => {
     });
     
     useEffect(() => {
-        if ( !isFocused ) return;
 
-        console.log('{Home}: useEffect called: ' + isFocused);
+        // don't call useEffect if screen is not at top of screen stack
+        if ( !isFocused ) return;
 
         /* REWRITE THIS FUNCTION */
 
+
         (async () => {
-            console.log('{Home}: async entered');
+        let docNames = {};
+        // retrieve a map of all coffee shops in the 'data' collection.
+        // Doing this, if a coffee shop is removed from the collection, 
+        // we can also delete it from the user document
+        const collectionRef = collection(FIREBASE_DB, 'data');
+        await getDocs(collectionRef).then( snap => {
+            snap.forEach( doc => {
+                docNames[doc.id] = true;
+            });
+        }).catch( error => {
+            console.log('Home.js/55/ ' + error);
+        });
+
+
             await getUserDocument().then( userDocSnap => {
-                console.log('{Home - async}: Retrieved user document snapshot: ' + userDocSnap.id);
+
                 let coffeeShopObjects = [];
                 // iterates coffee shops in the users document
                 Object.entries( userDocSnap.data() ).forEach( ([coffeeShop, coffeeShopData]) => {
-                    // skip the total_score field in the users document
-                    if( !coffeeShop.includes('total_score') ) {
-                        coffeeShopObjects.push({ 'name' : coffeeShop, 'current' : coffeeShopData.current, 'max' : coffeeShopData.max,
-                         'timestamp' : coffeeShopData.most_recent, 'logo' : coffeeShopData.logo, 'beans' : coffeeShopData.user_shop_score });
-                        console.log('{Home} Pushing ' + coffeeShop + ' to CoffeeShop array.')
+                    // check if coffee shop is still signed up by checking the docNames hashmap
+                    if ( docNames[coffeeShop] ) {
+                        // skip the total_score field in the users document
+                        if( !coffeeShop.includes('total_score') ) {
+                            coffeeShopObjects.push({ 'name' : coffeeShop, 'current' : coffeeShopData.current, 'max' : coffeeShopData.max,
+                             'timestamp' : coffeeShopData.most_recent, 'logo' : coffeeShopData.logo, 'beans' : coffeeShopData.user_shop_score });
+                        }
                     }
                 });
                 return coffeeShopObjects;
             }).then( coffeeShopObjects => {
+                // sort coffee shop objects by last scanned
                 coffeeShopObjects.sort((a,b) => {
                     if ( a.timestamp < b.timestamp ) {
                         return 1;

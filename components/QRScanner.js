@@ -19,7 +19,6 @@ const QRScanner = ({navigation}) => {
 
     /* on initial render get permissions and put all user data */
     useEffect(() => {
-        console.log('{QRScanner}: useEffect called');
 
         // get permissions
         const getBarCodeScannerPermissions = async () => {
@@ -44,6 +43,7 @@ const QRScanner = ({navigation}) => {
       }, []);
 
     async function handleBarcodeScanned( {data} ) {
+
         setScanned(true);
 
         // temp object to make local copy of user document snapshot
@@ -88,15 +88,35 @@ const QRScanner = ({navigation}) => {
 
         let newObj = { [data] : tempDoc }
 
-        // set / merge the user document document
+        //
         const collectionRef = collection(FIREBASE_DB, 'data');
+
+        // retrieve shop document and store in local object, update customers field
+        // in the local object, and merge the local object to the shops document.
+        const shopDocRef = doc(collectionRef, data);
+        let tempShopObj = {};
+        await getDoc(shopDocRef).then( snap => {
+            tempShopObj = snap.data()['customers'];
+            // if the customer hasnt visited the shop before
+            if ( !tempShopObj[FIREBASE_AUTH.currentUser.email] ) {
+                tempShopObj[FIREBASE_AUTH.currentUser.email]['scans'] = Number(1);
+            } else {
+                let count = tempShopObj[FIREBASE_AUTH.currentUser.email]['scans'] + 1;
+                tempShopObj[FIREBASE_AUTH.currentUser.email]['scans'] = Number(count);
+            }
+        }).catch( error => {
+            console.log('Error getting shop data (QRScanner.js/98): ' + error);
+        });
+        
+        await setDoc( shopDocRef, { 'customers': { [FIREBASE_AUTH.currentUser.email] :  tempShopObj[FIREBASE_AUTH.currentUser.email]  } }, {merge: true} );
+
+        // set / merge the user document document
         const userDocRef = doc(collectionRef, FIREBASE_AUTH.currentUser.email);
         await setDoc( userDocRef , newObj , {merge: true} ).then(() => {
-            console.log('{QRScanner: Going back...}')
             return navigation.goBack();
         }).catch((error) => {
             console.log('Set doc error ' + error.message);
-        })
+        });
     }
       
 
@@ -113,7 +133,6 @@ async function getTallyData(shopName, docRef) {
     let data = await docSnap.get(shopName);
     return data;
 }
-
 
 async function getShopData(collectionRef, shopName) {
     const shopDocRef = doc(collectionRef, shopName);

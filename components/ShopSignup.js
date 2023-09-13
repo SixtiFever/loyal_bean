@@ -6,11 +6,23 @@ import { FIREBASE_DB, FIREBASE_STORAGE } from '../firebase';
 import { getDownloadURL, ref, uploadBytes, uploadString } from 'firebase/storage';
 import QRCode from 'react-native-qrcode-svg';
 import { collection, getDoc, setDoc, doc } from 'firebase/firestore';
+import Geocoder from 'react-native-geocoding';
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 
 global.Buffer = require('buffer').Buffer;
+Geocoder.init("AIzaSyC7oUXLzOiIzfE1cJG98M3V9W-BAeThpSE", { language: "en" });
+const auth = getAuth();
+
+/*
+Geocode.setApiKey("AIzaSyC7oUXLzOiIzfE1cJG98M3V9W-BAeThpSE");
+Geocode.setLanguage("en");
+Geocode.setRegion("uk");
+Geocode.enableDebug();
+*/
 
 class Shop {
-    constructor(shopName, shopEmail, shopNumber, contactName, contactEmail, contactNumber, shopAddress, maxCoffees, logo = null) {
+    constructor(shopName, shopEmail, shopNumber, contactName, contactEmail, contactNumber, shopAddress, maxCoffees, logo = null,
+        password, confirmPassword) {
         this.shopName = shopName;
         this.shopEmail = shopEmail;
         this.shopNumber = shopNumber;
@@ -19,6 +31,8 @@ class Shop {
         this.contactNumber = contactNumber;
         this.shopAddress = shopAddress;
         this.maxCoffees = maxCoffees;
+        this.password = password;
+        this.confirmPassword = confirmPassword;
         this.logo = logo;
         this.qrLink = '';
         this.logoUrl = '';
@@ -63,7 +77,8 @@ const ShopSignup = ({navigation}) => {
 
     const handleRegister = async() => {
         // seng logo and qr code to firebase storage
-        const shop = new Shop(shopName, shopEmail, shopNumber, contactName, contactEmail, contactNumber, shopAddress, maxCoffees, logo )
+        const shop = new Shop(shopName, shopEmail, shopNumber, contactName, contactEmail, contactNumber, shopAddress, maxCoffees, logo,
+            password, confirmPassword )
         const logoStorageRef = ref( FIREBASE_STORAGE, `${shop.shopName}/logo.png` );
         // use fetch to convert the logo image to binary data since uploadBytes only accepts binary data.
         const response = await fetch(logo);
@@ -86,7 +101,6 @@ const ShopSignup = ({navigation}) => {
             console.log('Error uploading qr link: ' + error);
         });
 
-        console.log(shop);
         // send all data to firestore
         const collectionRef = collection( FIREBASE_DB, 'data' );
         const docRef = doc( collectionRef, shopName );
@@ -94,6 +108,8 @@ const ShopSignup = ({navigation}) => {
                         'shop_name': shop.shopName,
                         'shop_email': shop.shopEmail,
                         'shop_number': shop.shopNumber,
+                        'shop_password': shop.password,
+                        'shop_confirm_password': shop.confirmPassword,
                         'contact_name': shop.contactName,
                         'contact_email': shop.contactEmail,
                         'contact_number': shop.contactNumber,
@@ -104,9 +120,38 @@ const ShopSignup = ({navigation}) => {
         } ).then(() => {
             console.log('Shop doc uploaded');
         }).catch((error) => {
-            console.log('Error uploading shop document: ' + error);
-        });
+            console.log(error);
+        })
+        // .then(() => {
+        //     // upload shop co-ordinates to shop_locations document
+        //     Geocoder.from(shop.shopAddress).then( json => {
+        //         let location = json.results[0].geometry.location;
+        //         console.log(location);
+        //     }).catch((error) => {
+        //         console.log('Error getting coordinates: ' + JSON.stringify(error));
+        //     });
+        // }).catch((error) => {
+        //     console.log('Error uploading shop document: ' + error);
+        // });
 
+        let shopLocationsDocRef = doc(collectionRef, 'shop_locations');
+        await setDoc(shopLocationsDocRef, { [shop.shopName] : { 'address': shop.shopAddress, 'coordinates' : {'test' : 'Coordinates will go here when api billing is fixed'} } }, {merge: true} ).then( () => {
+            console.log('Shop_locations document updated');
+        } ).catch( (error) => {
+            console.log(error);
+        } );
+
+        createUserWithEmailAndPassword(auth, shop.shopEmail, shop.password)
+        .then((userCredential) => {
+            console.log(userCredential);
+            // Signed in 
+            const user = userCredential.user;
+            // ...
+        })
+        .catch((error) => {
+            alert(error.message);
+            // ..
+        });
 
 
 

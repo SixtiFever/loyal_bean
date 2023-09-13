@@ -83,7 +83,7 @@ const Map = ( {navigation} ) => {
     }
 }
 
-/* get cafe location data from firestore */
+/* returns shop_locations snapshot, containing location coordinates for all registered shop */
 const getCafeLocations = async () => {
     // retrieve all cafe co-ordinates from firestore
     const collectionRef = collection( FIREBASE_DB, 'data' );
