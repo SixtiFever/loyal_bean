@@ -161,7 +161,7 @@ const ShopSignup = ({navigation}) => {
 
     return (
         <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-            <ScrollView contentContainerStyle={{alignItems:'center'}} style={{flex: 1, width: '80%'}}>
+            <ScrollView contentContainerStyle={{alignItems:'center'}} style={{flex: 1, width: '100%'}}>
                 <KeyboardAvoidingView style={{display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'center'}} behavior="padding">
                     <TextInput style={styles.textInput} placeholder="Shop name" onChangeText={text => setShopName(text)}/>
                     <TextInput style={styles.textInput} placeholder="Shop email" onChangeText={text => setShopEmail(text)}/>
@@ -176,12 +176,13 @@ const ShopSignup = ({navigation}) => {
                     minValue={0}
                     onChange={value => setMaxCoffees(value)} 
                     valueType='integer'
+                    containerStyle={{ marginTop: 30 }}
                     />
                     <Button title="Upload shop logo" onPress={pickImage} />
                     {logo && <Image source={{ uri: logo }} style={{ width: 200, height: 200 }} />}
                     <Button title="Clear" onPress={() => { setLogo(null) }} />
                     <Pressable style={styles.pressableButton} onPress={handleRegister}>
-                        <Text>Register shop</Text>
+                        <Text style={{color: 'white'}}>Register shop</Text>
                     </Pressable>
                 </KeyboardAvoidingView>
             </ScrollView>
@@ -216,6 +217,7 @@ const styles = StyleSheet.create({
         borderRadius: 6,
         color: 'black',
         paddingStart: 15,
+        marginTop: 20,
     },
     pressableButton: {
         width: '80%',
@@ -223,7 +225,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 6,
-        backgroundColor: '#FF5E36',
+        backgroundColor: '#F70084',
+        marginTop: 20,
     },
 })
 

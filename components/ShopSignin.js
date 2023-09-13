@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import {Text, View, Button, Pressable, StyleSheet, TextInput, KeyboardAvoidingView} from 'react-native';
+import {Text, View, Button, Pressable, StyleSheet, TextInput, KeyboardAvoidingView, Image} from 'react-native';
 import ShopProfile from './ShopProfile';
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+
+const logo = require('../assets/lb_logo.png');
 
 
 const ShopSignin = ({navigation}) => {
@@ -28,11 +30,14 @@ const ShopSignin = ({navigation}) => {
 
     return (
         <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+            <View style={styles.logoContainer}>
+                    <Image source={logo} style={{height: 100, width: 100}} />
+                </View>
             <KeyboardAvoidingView style={{display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'center'}} behavior="padding">
                 <TextInput style={styles.textInput} placeholder="Email" onChangeText={text => setEmail(text)}/>
                 <TextInput style={styles.textInput} placeholder="Password" onChangeText={text => setPassword(text)}/>
                 <Pressable style={styles.pressableButton} onPress={handleSignin}>
-                    <Text>Sign in</Text>
+                    <Text style={{color: 'white'}}>Sign in</Text>
                 </Pressable>
                 <Pressable onPress={() => { navigation.navigate('ShopSignup') }}>
                     <Text>Shop not registered? Register here!</Text>
@@ -53,6 +58,7 @@ const styles = StyleSheet.create({
         borderRadius: 6,
         color: 'black',
         paddingStart: 15,
+        marginBottom: 40,
     },
     pressableButton: {
         width: '80%',
@@ -60,6 +66,15 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 6,
-        backgroundColor: '#FF5E36',
+        backgroundColor: '#F70084',
+        marginBottom: 20,
     },
+    logoContainer : {
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        height: '40%',
+        position: 'absolute',
+        top: 0,
+    }
 })

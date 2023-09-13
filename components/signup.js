@@ -50,8 +50,10 @@ const Signup = ({navigation}) => {
                         <Pressable style={styles.pressableButton} onPress={handleSignup}>
                             <Text style={{color: 'white'}}>Create Account</Text>
                         </Pressable>
-                        <Pressable onPress={() => navigation.navigate('Login')}>
-                            <Text style={styles.pressableText}>Login</Text>
+                        <View style={styles.horizontalLine}>
+                        </View>
+                        <Pressable onPress={() => navigation.navigate('Login')}>          
+                            <Text style={styles.pressableText}>Already have an account? Login</Text>
                         </Pressable>
                     </View>
                 </View>
@@ -64,6 +66,7 @@ const Signup = ({navigation}) => {
 const styles = StyleSheet.create({
     mainContainer: {
         flex: 1,
+        backgroundColor: '#FFFEF9'
     },
     logoContainer: {
         flex: 1,
@@ -76,11 +79,10 @@ const styles = StyleSheet.create({
     textInput: {
         width: '80%',
         height: 60,
-        borderWidth: 1,
-        borderColor: 'black',
         borderRadius: 6,
-        color: 'black',
+        color: '#1B0229',
         paddingStart: 15,
+        backgroundColor: '#E3E3E3',
     },
     pressableButton: {
         width: '80%',
@@ -88,10 +90,15 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 6,
-        backgroundColor: '#4b371c',
+        backgroundColor: '#F70084',
     },
     pressableText: {
         color: 'blue',
+    },
+    horizontalLine: {
+        height: 1,
+        backgroundColor: '#D8D8D8',
+        width: '100%',
     }
 })
 

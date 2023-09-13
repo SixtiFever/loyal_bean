@@ -42,8 +42,10 @@ const Login = ({navigation}) => {
                         <Pressable style={styles.pressableButton} onPress={handleLogin}>
                             <Text style={{color: 'white'}}>Login</Text>
                         </Pressable>
+                        <View style={styles.horizontalLine}>
+                        </View>
                         <Pressable onPress={() => navigation.navigate('Signup')}>
-                            <Text style={styles.pressableText}>Create user account</Text>
+                            <Text style={styles.pressableText}>Not a user? Create account!</Text>
                         </Pressable>
                     </View>
                 </View>
@@ -67,11 +69,10 @@ const styles = StyleSheet.create({
     textInput: {
         width: '80%',
         height: 60,
-        borderWidth: 1,
-        borderColor: 'black',
         borderRadius: 6,
-        color: 'black',
+        color: '#1B0229',
         paddingStart: 15,
+        backgroundColor: '#E3E3E3',
     },
     pressableButton: {
         width: '80%',
@@ -79,10 +80,15 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 6,
-        backgroundColor: '#FF5E36',
+        backgroundColor: '#F70084',
     },
     pressableText: {
         color: 'blue',
+    },
+    horizontalLine: {
+        height: 1,
+        backgroundColor: '#D8D8D8',
+        width: '100%',
     }
 })
 
