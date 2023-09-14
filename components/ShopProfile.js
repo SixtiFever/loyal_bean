@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image } from 'react-native';
+import { View, Text, Image, StyleSheet } from 'react-native';
 import { FIREBASE_AUTH, FIREBASE_DB } from '../firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { collection, getDocs } from 'firebase/firestore';
@@ -56,23 +56,70 @@ const ShopProfile = ({navigation}) => {
 
     return (
         <View>
-            <Text>Shop name: { shopObject ? shopObject['shop_name'] : 'Issue showing name' }</Text>
-            <Text>Shop email: { shopEmail ? shopEmail : 'Issue showing email' }</Text>
-            <Text>Shop number: { shopObject ? shopObject['shop_number'] : 'Issue showing number' }</Text>
-            <Text>Shop address: { shopObject ? shopObject['shop_address'] : 'Issue showing address' }</Text>
-            <Text>Shop password: { shopObject ? shopObject['shop_password'] : 'Issue showing address' }</Text>
-            <Text>Contact name: { shopObject ? shopObject.contact_name : 'Issue retrieving shop contact name' }</Text>
-            <Text>Contact name: { shopObject ? shopObject.contact_email : 'Issue retrieving shop contact email' }</Text>
-            <Text>Contact name: { shopObject ? shopObject.contact_number : 'Issue retrieving shop contact number' }</Text>
-            <Text>Customer stats:</Text>
-            { stateCustomerArray.map( customer => {
-                return (
-                    <Text>{customer[0]} : { customer[1]['scans'] }</Text>
-                )
-                
-            }) }
+            <View style={styles.textContainer}>
+                <Text style={styles.key}>Shop name</Text>
+                <Text style={styles.value}>{ shopObject ? shopObject['shop_name'] : 'Issue showing name' }</Text>
+            </View>
+            <View style={styles.textContainer}>
+                <Text style={styles.key}>Shop email</Text>
+                <Text style={styles.value}>{ shopEmail ? shopEmail : 'Issue showing email' }</Text>
+            </View>
+            <View style={styles.textContainer}>
+                <Text style={styles.key}>Shop number</Text>
+                <Text style={styles.value}>{ shopObject ? shopObject['shop_number'] : 'Issue showing number' }</Text>
+            </View>
+            <View style={styles.textContainer}>
+                <Text style={styles.key}>Shop address</Text>
+                <Text style={styles.value}>{ shopObject ? shopObject['shop_address'] : 'Issue showing address' }</Text>
+            </View>
+            <View style={styles.textContainer}>
+                <Text style={styles.key}>Shop password</Text>
+                <Text style={styles.value}>{ shopObject ? shopObject['shop_password'] : 'Issue showing address' }</Text>
+            </View>
+            <View style={styles.textContainer}>
+                <Text style={styles.key}>Contact name</Text>
+                <Text style={styles.value}>{ shopObject ? shopObject.contact_name : 'Issue retrieving shop contact name' }</Text>
+            </View>
+            <View style={styles.textContainer}>
+                <Text style={styles.key}>Contact email</Text>
+                <Text style={styles.value}>{ shopObject ? shopObject.contact_email : 'Issue retrieving shop contact email' }</Text>
+            </View>
+            <View style={styles.textContainer}>
+                <Text style={styles.key}>Contact number</Text>
+                <Text style={styles.value}>{ shopObject ? shopObject.contact_number : 'Issue retrieving shop contact number' }</Text>
+            </View>
+            <View style={[styles.textContainer, { marginLeft: 15 }]}>
+            <Text style={styles.key}>Customer stats:</Text>
+
+                { shopObject ==  null ? <Text>No customer states</Text> : Object.entries(shopObject['customers']).map( customer => {
+                    return (
+                        <Text style={[styles.value, { marginLeft: 10 }]} key={customer[0]}>{ customer[0] } : { customer[1]['scans'] }</Text>
+                    )
+                }) }    
+            </View>
         </View>
     )
 }
+
+
+
+const styles = StyleSheet.create({
+    textContainer: {
+        display: 'flex',
+        height: 75,
+        justifyContent: 'center',
+        marginLeft: 15,
+    },
+    key: {
+        fontSize: 14,
+        color: '#1B0229',
+        fontWeight: 900,
+    },
+    value: {
+        fontSize: 22,
+        color: '#1B0229',
+        fontWeight: 300,
+    }
+})
 
 export default ShopProfile;
