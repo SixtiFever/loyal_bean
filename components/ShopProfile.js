@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet, Button } from 'react-native';
 import { FIREBASE_AUTH, FIREBASE_DB } from '../firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { collection, getDocs } from 'firebase/firestore';
+import { useNavigation } from '@react-navigation/native';
 
 const ShopProfile = ({navigation}) => {
 
@@ -97,6 +98,14 @@ const ShopProfile = ({navigation}) => {
                     )
                 }) }    
             </View>
+
+            <View style={{ marginTop: 25 }}>
+            <Button title='Logout' onPress={() => {
+                FIREBASE_AUTH.signOut();
+                navigation.pop();
+            }} />
+            </View>
+            
         </View>
     )
 }
@@ -119,7 +128,7 @@ const styles = StyleSheet.create({
         fontSize: 22,
         color: '#1B0229',
         fontWeight: 300,
-    }
+    },
 })
 
 export default ShopProfile;

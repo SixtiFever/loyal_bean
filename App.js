@@ -49,7 +49,7 @@ const ScreenStack = () => {
             <Stack.Screen options={{
                 title: 'Shop Registration'
             }} name='ShopSignup' component={ShopSignup} />
-            <Stack.Screen options={{title: 'Shop Profile'}}
+            <Stack.Screen options={{title: 'Shop Profile', headerLeft: () => null}}
                 name='ShopProfile' component={ShopProfile} />
         </Stack.Navigator>
     )
