@@ -117,6 +117,7 @@ const ShopSignup = ({navigation}) => {
                         'max_tally': shop.maxCoffees,
                         'logo': shop.logoUrl,
                         'qr_code_bytes': shop.qrLink,
+                        'customers' : {},
         } ).then(() => {
             console.log('Shop doc uploaded');
         }).catch((error) => {

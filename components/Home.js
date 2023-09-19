@@ -42,7 +42,6 @@ const Home = ({navigation}) => {
 
         /* REWRITE THIS FUNCTION */
 
-
         (async () => {
         let docNames = {};
         // retrieve a map of all coffee shops in the 'data' collection.

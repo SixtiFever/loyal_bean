@@ -92,11 +92,11 @@ const ShopProfile = ({navigation}) => {
             <View style={[styles.textContainer, { marginLeft: 15 }]}>
             <Text style={styles.key}>Customer stats:</Text>
 
-                { shopObject ==  null ? <Text>No customer states</Text> : Object.entries(shopObject['customers']).map( customer => {
+                {/* { shopObject ==  null ? <Text>No customer states</Text> : Object.entries(shopObject['customers']).map( customer => {
                     return (
                         <Text style={[styles.value, { marginLeft: 10 }]} key={customer[0]}>{ customer[0] } : { customer[1]['scans'] }</Text>
                     )
-                }) }    
+                }) }     */}
             </View>
 
             <View style={{ marginTop: 25 }}>

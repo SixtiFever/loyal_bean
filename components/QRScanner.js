@@ -88,7 +88,6 @@ const QRScanner = ({navigation}) => {
 
         let newObj = { [data] : tempDoc }
 
-        //
         const collectionRef = collection(FIREBASE_DB, 'data');
 
         // retrieve shop document and store in local object, update customers field
